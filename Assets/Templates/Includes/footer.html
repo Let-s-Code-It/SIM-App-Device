@@ -1,0 +1,125 @@
+			</div>
+		</div>
+	</body>
+
+	<style>
+		footer {
+			position: fixed;
+			left: 0;
+			bottom: 0;
+			width: 100%;
+			background-color: rgb(0 0 0 / 59%);
+			color: white;
+			text-align: center;
+		}
+		footer > a {
+			color:white;
+		}
+	</style>
+
+	{% if endpoint != 'login' %}
+	<script>
+
+		const global_alert = document.getElementById("global-alert");
+
+
+		function reqListener () {
+
+			try {
+				if(this.status == 401) {
+					location.href = "/";
+					throw Error("Maybe Not logged");
+				}
+
+				const d = JSON.parse(this.responseText);
+			  	console.log(d);
+
+
+			  	/**
+			  	 * Global alert window
+			  	 */
+
+			  	global_alert.innerHTML = "" +
+			  	"Real time data: " + d.time_now + "<br>" +
+			  	"Socket status: " +
+			  	(d.socket_connected ? 
+			  		( d.socket_logged ? 
+			  			( d.device_adopted ? "<b style='color:lime'>Connected</b>" : "<b style='color:yellow'>Connected, pending adoption</b>" ) : 
+			  			"<b style='color:orange'>Login Fail...</b>") : 
+			  		"<b style='color:red'>Disconnected</b>") +
+			  	"<br>" + 
+			  	"Serial status:  " +
+			  	(d.serial_connected ? "<b style='color:lime'>Connected</b>" : "<b style='color:red'>Disconnected</b>   (attempt every 10s)") + 
+			  	""
+
+
+
+			  	/**
+			  	 * Page:
+			  	 * /sms_list
+			  	 * */
+				if(d.sms_list) {
+					const el_sms_list = document.getElementById("sms-list");
+					if(document.body.contains(el_sms_list)) {
+						console.log('update sms list....')
+
+						/*var child = el_sms_list.lastElementChild; 
+				        while (child) {
+				            el_sms_list.removeChild(child);
+				            child = el_sms_list.lastElementChild;
+				     	}*/
+
+				     	el_sms_list.innerHTML = '';
+
+				     	for(var i in d.sms_list) {
+				     		const sms = d.sms_list[i];
+
+				     		var area = document.createElement("textarea");
+				     		area.value = sms[3] + "\n" + "From: " + sms[1] + "\n\n" + sms[2];
+				     		area.style.height = '150px';
+				     		area.disabled = true;
+				     		area.readony = true;
+
+				     		el_sms_list.appendChild(area);
+				     	}
+					} else console.log('no sms-list element on html')
+				} else console.log('sms_list no exist in array')
+
+
+			} catch(e) {
+				console.warn(e)
+				global_alert.innerHTML = "<b style='color:red'>Something went wrong</b>";
+			}
+
+		  
+		}
+
+		function loopRequest() {
+			try {
+				const req = new XMLHttpRequest();
+				req.addEventListener("load", reqListener);
+
+				req.onerror = function(e){
+				    global_alert.innerHTML = "<b style='color:red'>Something went wrong</b>";
+				};
+
+				req.open("GET", "/json_data");
+				req.send();
+			} catch(e) {
+				console.log('loopRequest catch:', e)
+				
+			} finally {
+				setTimeout(loopRequest, 5 * 1000)
+			}
+		}
+
+		loopRequest()
+
+	</script>
+	{% endif %}
+
+	<footer>
+		Created by <a target=_blank href="https://www.letscode.it">Karol Sójka</a>, from Poland.
+	</footer>
+
+</html>

@@ -1,0 +1,90 @@
+{% include 'Includes/head.html' %}
+    <h3>System Configuration</h3>
+    
+
+    <br><br>
+
+    <form class="form" action="/config" method="post" enctype="multipart/form-data" autocomplete="off">
+      <div class="alert alert-error"></div>
+
+      <hr>
+
+      <div>
+        <br><h3>Select Serial Port</h3><br>
+        
+        {% for port in ports %}
+          <div>
+            <input {% if target_port == port[0] %} checked {% endif %} value="{{port[0]}}" type="radio" name="serial_port" id="serial_port_{{loop.index}}">
+            <label for="serial_port_{{loop.index}}">{{port[0]}} -> {{port[1]}}</label>
+          </div>
+        {% endfor %}
+
+        <br><hr><br>
+
+      </div>
+
+      <div>
+        (TODO... not working yet)
+      </div>
+      
+      <div>
+        <input id="receive_sms" name="receive_sms" type="checkbox">
+        <label for="receive_sms">Recive SMS</label>
+      </div>
+
+      <div>
+        <input id="answer_calls" name="answer_calls" type="checkbox">
+        <label for="answer_calls">Answer incoming calls</label>
+      </div>
+
+      <br><hr><br>
+
+      <h3>APN MMS</h3>
+
+      <br>
+
+      {% for input in apn_mms_inputs %}
+
+      <label for="{{input.title}}">{{input.title}}</label>
+      <input type="text" placeholder="{{input.title}}" name="{{input.name}}" id="{{input.name}}" required />
+      <br>
+      {% endfor %}
+
+      <!--{{apn_mms_templates}}-->
+
+
+      
+      <h3>OR select APN from templates</h3>
+
+      {% for input in apn_mms_templates %}
+      <div>
+        <input value="{{input}}" type="radio" name="apn_mms_templates" id="apn_mms_templates_{{loop.index}}" onclick='change_mms_template("{{loop.index}}")'>
+        <label for="apn_mms_templates_{{loop.index}}">{{input.friendly_apn_mms_name}}</label>
+      </div>
+      {% endfor %}
+
+
+
+      <br><br><br>
+
+
+      <input type="submit" value="Submit" name="submit" class="btn btn-block btn-primary" />
+    </form>
+
+<script>
+
+const apn_sms_templates = {{apn_mms_templates|safe}};
+
+function change_mms_template(d)
+{
+  const data = apn_sms_templates[d-1];
+  console.log(data)
+
+  for(var i in data) {
+    document.getElementById(i).value = data[i];
+  }
+}
+
+</script>
+
+{% include 'Includes/footer.html' %}

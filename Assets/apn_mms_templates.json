@@ -1,0 +1,21 @@
+[{
+	"friendly_apn_mms_name": "Orange PL",
+	"url_mms_center": "mms.orange.pl",
+	"ip_mms_proxy": "192.168.6.104",
+	"port_mms_proxy": "8080",
+	"apn_name": "mms"
+},
+{
+	"friendly_apn_mms_name": "T-Mobile PL",
+	"url_mms_center": "mms/servlets/mms",
+	"ip_mms_proxy": "213.158.194.226",
+	"port_mms_proxy": "8080",
+	"apn_name": "mms"
+},
+{
+	"friendly_apn_mms_name": "Play PL",
+	"url_mms_center": "10.10.28.164/mms/wapenc",
+	"ip_mms_proxy": "10.10.25.5",
+	"port_mms_proxy": "8080",
+	"apn_name": "mms"
+}]

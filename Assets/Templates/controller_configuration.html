@@ -1,0 +1,14 @@
+{% include 'Includes/head.html' %}
+    <h3>Configure Remote controller</h3>
+    
+    <form class="form" method="post" enctype="multipart/form-data" autocomplete="off">
+      <div class="alert alert-error"></div>
+      
+      <input type="text" placeholder="Adress" name="address" required value="{{address}}" readonly blocked disabled />
+
+      <input type="text" placeholder="Login Key, UUID (ex: d2cd2e3d-4da2-4cb5-b2e8-ead9939bacc5)" name="unique_login_key" required />
+      <!--<textarea name="unique_login_key" placeholder="Login Key (70 chars)" style="min-height:50px"></textarea>-->
+      
+      <input type="submit" value="Connect" name="connect" class="btn btn-block btn-primary"/>
+    </form>
+{% include 'Includes/footer.html' %}

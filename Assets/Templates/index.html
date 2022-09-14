@@ -1,0 +1,63 @@
+{% include 'Includes/head.html' %}
+	
+    <br>
+
+    <a  class="a-btn" href="/controller_configuration"><button class="btn btn-block btn-primary"><h3>Controller Configuration</h3></button></a>
+
+    <br> <a  class="a-btn" href="/config"><button class="btn btn-block btn-primary"><h3>Configuration</h3></button></a>
+
+    <br><a  class="a-btn" href="/send_sms"><button class="btn btn-block btn-primary">Easy Send SMS</button></a>
+
+    <br><a  class="a-btn" href="/sms_list"><button class="btn btn-block btn-primary">Last 10 SMS</button></a>
+
+    <!--
+    <br>
+
+    <a  class="a-btn" href="/system_configuration"><button class="btn btn-block btn-primary"><h3>System Configuration</h3></button></a>
+    	
+    <br><br>
+
+    <a  class="a-btn" href="/send_sms"><button class="btn btn-block btn-primary">Easy Send SMS</button></a>
+    <a  class="a-btn" href="/send_mms"><button class="btn btn-block btn-primary">Easy Send MMS</button></a>
+    <a  class="a-btn" href="/send_ussd"><button class="btn btn-block btn-primary">Send USSD Code</button></a>
+
+    <br><br>
+    <hr>
+    <br><br>
+    
+
+    <a  class="a-btn" href="/serial_logs"><button class="btn btn-block btn-primary">Logs Serial</button></a>
+    -->
+
+
+
+
+    
+    <!--<script>
+    	ajax('/get_controller_status', function(r) {
+    		var el = document.getElementById("status");
+            if(r == "2") {
+                el.textContent = "Connected with Socket"
+                el.style.color = "lime"
+
+                ajax('/get_user_data', function(r) {
+                    var o = r.split('\n');
+                    document.getElementById("userAlert").style.display = "block";
+                    document.getElementById("name").textContent = o[0] + " " + o[1];
+                    document.getElementById("email").textContent = o[2];
+                });
+            } else if(r == "1") {
+				el.textContent = "Logging successful"
+				el.style.color = "lime"
+			} else if(r == "12") {
+                el.textContent = "Pending"
+                el.style.color = "orange"
+            } else {
+				el.textContent = "Failed"
+				el.style.color = "red"
+			}
+    	})
+    </script>-->
+
+  </div>
+{% include 'Includes/footer.html' %}

@@ -1,0 +1,10 @@
+{% include 'Includes/head.html' %}
+    <h3>Login Page</h3>
+    
+    <form class="form" action="login" method="post" enctype="multipart/form-data" autocomplete="off">
+      <input type="password" placeholder="password" name="password" required />
+
+      {% if error %}<div class="alert alert-error">{{error}}</div>{% endif %}
+      <input type="submit" value="Send" name="login" class="btn btn-block btn-primary" />
+    </form>
+{% include 'Includes/footer.html' %}
