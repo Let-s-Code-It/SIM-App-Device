@@ -12,6 +12,8 @@ from App.SQL import SQL
 
 QueuedCommand = namedtuple('QueuedCommand', ['value', 'callback'])
 
+import logging
+
 class SerialReader(Protocol):
     """
     Serial port reader customized to communicate with SIM800
@@ -39,6 +41,8 @@ class SerialReader(Protocol):
             'serial_number': ''
         }
 
+        self.sms_queue_from_panel = []
+
         self.reconfigure()
 
     def bind_event(self, event, callback):
@@ -65,6 +69,7 @@ class SerialReader(Protocol):
         self.queue.append(QueuedCommand(data, callback))
 
         if self.transport:
+            logging.debug("send_queued in write")
             self.send_queued()
 
     def reconfigure(self):
@@ -78,7 +83,7 @@ class SerialReader(Protocol):
         #self.write('\x1A', lambda transport,data: print("CTRL+z"))
 
 
-
+ 
         # self.write("ATE0")
 
         # self.write("ATD*101#;", lambda transport, data: print("")))
@@ -191,6 +196,7 @@ class SerialReader(Protocol):
         print('connection_made')
         self.transport = transport
 
+        logging.debug("send_queued in connection_made")
         self.send_queued()
 
     def send_queued(self):
@@ -205,8 +211,11 @@ class SerialReader(Protocol):
             return False
 
         queued_command = self.queue.pop(0)
-        self.last_command = queued_command.value
-        self.transport.write(str.encode(self.last_command) + b'\n')
+        self.last_command = queued_command
+        self.transport.write(str.encode(queued_command.value) + b'\n')
+        
+        logging.debug("Command sended: " + queued_command.value )
+        
         self.next_response_callback = queued_command.callback
         print("SENT QUEUED COMMAND (" + queued_command.value +  ")")
         time.sleep(1)
@@ -277,12 +286,13 @@ class SerialReader(Protocol):
 
         self.buffer = None
 
-        self.send_queued()
-
         if len(lines) == 0:
+            logging.debug("send_queued in data_received (if len(lines) == 0)")
+            self.send_queued()
             return
             
         print("Received: \n\t" + '\n\t'.join(lines) + "\n")
+        logging.debug("data_Received: \n\t" + '\n\t'.join(lines) + "\n")
 
         i = 0
         while i < len(lines):
@@ -316,7 +326,15 @@ class SerialReader(Protocol):
             else:
                 print("No callback defined for action '" + action + "'")
 
+        logging.debug("send_queued in data_received")
+        self.send_queued()
 
     def send_sms(self, number, text):
         print(["SEND SMS HANDLER", number, text])
-        self.write('AT+CMGS="'+UTF16.encode(number)+'"\n\r' + UTF16.encode(text) + chr(26), lambda transport, data: print("EASY SMS sended."))
+        self.write('AT+CMGS="'+UTF16.encode(number)+'"\n\r' + UTF16.encode(text) + chr(26) )
+
+    def send_sms_from_panel(self, message):
+        self.sms_queue_from_panel.append({
+            "message": message
+        })
+        self.send_sms(message['recipient'], message['text'])

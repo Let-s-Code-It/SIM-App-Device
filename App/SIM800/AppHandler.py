@@ -6,6 +6,8 @@ import time
 
 from App.SocketClient import SocketClient
 
+import logging
+
 class AppHandler:
     """
     Class with handlers to events emitted by SerialReader
@@ -28,6 +30,8 @@ class AppHandler:
 
         self.reader.bind_event("+CMS ERROR", AppHandler.cms_error)
         self.reader.bind_event("+CME ERROR", AppHandler.cms_error)
+
+        self.reader.bind_event("+CMGS", AppHandler.message_sent)
 
 
 
@@ -137,7 +141,12 @@ class AppHandler:
         Handler for errors
         """
 
-        print("Blont: " + data + ", po wykonaniu: " + transport.last_command + " :)")
+        print("Blont: " + data + ", po wykonaniu: " + transport.last_command.value + " :)")
+
+        logging.error('CMS/CME: ' + data + '(after ' + transport.last_command.value + ')')
+
+        #transport.last_command.callbackError(transport, data)
+        AppHandler.update_message_status_if_exist(transport, False, data)
 
 
     @staticmethod
@@ -151,6 +160,20 @@ class AppHandler:
     def save_serial_number(transport, data):
         print(["Serial number", data])
         transport.info['serial_number'] = data[0]
+
+    @staticmethod
+    def message_sent(transport, data):
+        AppHandler.update_message_status_if_exist(transport, True)
+
+    @staticmethod
+    def update_message_status_if_exist(transport, success, reason=None):
+        if(len(transport.sms_queue_from_panel) > 0):
+            data = transport.sms_queue_from_panel.pop(0)
+            if(success):
+                SocketClient.MessageSentSuccessfully(data['message'])
+            else:
+                SocketClient.MessageNotSent(data['message'], reason)
+
 
 
 

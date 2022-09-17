@@ -8,6 +8,8 @@ from App.Utils.SystemInfo import getSystemInfo
 
 from App.Device import Device
 
+import logging
+
 sio = socketio.Client()
 
 @sio.event(namespace='/device')
@@ -59,6 +61,7 @@ def on_message(data):
 @sio.on('login', namespace='/device')
 def on_message():
     print('Loggin success.')
+    logging.info('Logged in to the socket server')
     print(getSystemInfo())
     SocketClient.Logged = True
     SocketClient.emit("device info", getSystemInfo())
@@ -80,7 +83,14 @@ def on_message(data):
 def on_message(data):
     print("sending a new message at the request of the sim app panel ")
     print(data)
-    SocketClient.Readers[0].send_sms(data['recipient'], data['text'])
+    SocketClient.Readers[0].send_sms_from_panel(data)
+    """SocketClient.Readers[0].send_sms(
+        data['recipient'], 
+        data['text'], 
+        lambda transport: SocketClient.MessageSentSuccessfully(transport, data), 
+        lambda transport, d: SocketClient.MessageNotSent(transport, d, data)
+    )"""
+
 
 
 
@@ -174,6 +184,23 @@ class SocketClient:
             SocketClient.emit("update sim cards", [SocketClient.Readers[0].info])
         else:
             print("SendReadersInfo: No one Readers ready...")
+
+
+    @staticmethod
+    def MessageSentSuccessfully(message):
+        print("----->Wiadomość sms wysłana pomyślnie")
+        SocketClient.emit("message sent successfully", {
+            "message": message,
+        })
+
+    @staticmethod
+    def MessageNotSent(message, reason):
+        print("----->Wadimość sms NIE wysłana z bledem '"+reason+"' ")
+        
+        SocketClient.emit("message not sent", {
+            "message": message,
+            "reason": reason
+        })
 
 
     

@@ -18,9 +18,18 @@ GetReader().write(...)
 
 
 """
+import os
+
+
+import logging
+logDirectory = 'Data/logs'
+if not os.path.exists(logDirectory):
+    os.makedirs(logDirectory)
+logging.basicConfig(filename=logDirectory+'/logs.log', format='%(asctime)s - [%(levelname)s]: %(message)s', level=logging.DEBUG)
+logging.info('System starts')
+
 
 import signal
-import os
 def signal_handler(sig, frame):
     print('You pressed Ctrl+C!')
     os._exit(0)
