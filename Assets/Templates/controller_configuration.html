@@ -1,7 +1,7 @@
 {% include 'Includes/head.html' %}
     <h3>Configure Remote controller</h3>
     
-    <form class="form" method="post" enctype="multipart/form-data" autocomplete="off">
+    <form id="controller_configuration" class="form" method="post" enctype="multipart/form-data" autocomplete="off">
       <div class="alert alert-error"></div>
       
       <input type="text" placeholder="Adress" name="address" required value="{{address}}" readonly blocked disabled />
@@ -11,4 +11,32 @@
       
       <input type="submit" value="Connect" name="connect" class="btn btn-block btn-primary"/>
     </form>
+
+    <div id="change_configuration_page" style="display:none">
+      <hr>
+      <br>Your device is connected and has successfully logged into the remote controller. 
+      <br>The configuration has been hidden. If you change it, 
+      <br>you will need to reconfigure the device on the controller side. 
+      <br>Are you sure you want to do this?
+
+      <button onclick="change_configuration()" class="btn btn-block btn-primary">Change Configuration</button>
+    </div>
+
+    <script>
+      const socket_logged = '{{socket_logged}}' == 'true';
+      
+      const controller_configuration_form = document.getElementById("controller_configuration");
+      const change_configuration_el = document.getElementById("change_configuration_page");
+
+      if(socket_logged) {
+        controller_configuration_form.style.display = 'none';
+        change_configuration_el.style.display = 'block';
+      }
+
+      function change_configuration() {
+        controller_configuration_form.style.display = 'block';
+        change_configuration_el.style.display = 'none';
+      }
+
+    </script>
 {% include 'Includes/footer.html' %}

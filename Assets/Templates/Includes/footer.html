@@ -49,7 +49,11 @@
 			  		"<b style='color:red'>Disconnected</b>") +
 			  	"<br>" + 
 			  	"Serial status:  " +
-			  	(d.serial_connected ? "<b style='color:lime'>Connected</b>" : "<b style='color:red'>Disconnected</b>   (attempt every 10s)") + 
+
+			  	(d.serial_connected ? 
+				  	!d.connection_confirmed ? "<b style='color:red'>The selected port did not respond</b>":
+					(d.apn_configured ? "<b style='color:lime'>Connected</b>" :  "<b style='color:orange'>Configure APN!</b>"): 
+					"<b style='color:red'>Disconnected</b>   (attempt every 10s)") + 
 			  	""
 
 
@@ -100,7 +104,7 @@
 				req.addEventListener("load", reqListener);
 
 				req.onerror = function(e){
-				    global_alert.innerHTML = "<b style='color:red'>Something went wrong</b>";
+				    global_alert.innerHTML = "<b style='color:red'>The application is not responding</b>";
 				};
 
 				req.open("GET", "/json_data");

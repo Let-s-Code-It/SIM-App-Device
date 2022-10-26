@@ -1,0 +1,52 @@
+{% include 'Includes/head.html' %}
+
+    <h3>Commands in queue (<span id="commands_count"></span>)</h3>
+    
+    
+
+    <div id="textareas" >
+        <textarea type="text" placeholder="Text" name="text" required style="height:60px">Wait...</textarea>
+    </div>
+
+
+    <script>
+
+        const textareas = document.getElementById("textareas");
+        const commands_count = document.getElementById("commands_count")
+        function getQueueCommands() {
+			try {
+				const req = new XMLHttpRequest();
+				req.addEventListener("load", function(){
+                    const d = JSON.parse(this.responseText);
+                    console.log(d)
+                    textareas.innerHTML = "";
+                    commands_count.innerHTML = d.length;
+                    d.forEach((v) => {
+                        const area = document.createElement("textarea");
+                        const texta = document.createTextNode(v);
+                        area.appendChild(texta)
+                        textareas.appendChild(area);
+                    })
+                });
+
+				req.onerror = function(e){
+				    textareas.innerHTML = "<b style='color:red'>Something went wrong</b>";
+                    commands_count.innerHTML = "?"
+				};
+
+				req.open("GET", '/debug/comands_in_queue/json');
+				req.send();
+			} catch(e) {
+				console.log(' catch:', e)
+                textareas.innerHTML = "<b style='color:red'>Something went wrong</b>";
+                commands_count.innerHTML = "?"
+				
+			} finally {
+				setTimeout(getQueueCommands, 777)
+			}
+		}
+
+        getQueueCommands()
+    </script>
+
+{% include 'Includes/footer.html' %}

@@ -24,16 +24,17 @@
       </div>
 
       <div>
+        <h3>Features</h3><br>
         (TODO... not working yet)
       </div>
       
       <div>
-        <input id="receive_sms" name="receive_sms" type="checkbox">
+        <input disabled checked id="receive_sms" name="receive_sms" type="checkbox">
         <label for="receive_sms">Recive SMS</label>
       </div>
 
       <div>
-        <input id="answer_calls" name="answer_calls" type="checkbox">
+        <input disabled checked id="answer_calls" name="answer_calls" type="checkbox">
         <label for="answer_calls">Answer incoming calls</label>
       </div>
 
@@ -46,7 +47,13 @@
       {% for input in apn_mms_inputs %}
 
       <label for="{{input.title}}">{{input.title}}</label>
-      <input type="text" placeholder="{{input.title}}" name="{{input.name}}" id="{{input.name}}" required />
+      <input type="text" 
+        placeholder="{{input.title}}" 
+        name="{{input.name}}" 
+        id="{{input.name}}" 
+        required
+        value="{{apn_data[input.name]}}"
+        />
       <br>
       {% endfor %}
 

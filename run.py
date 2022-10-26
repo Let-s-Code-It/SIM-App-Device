@@ -1,8 +1,17 @@
 
+"""
+Created by Karol Sójka
+Let's Code It
+www.letscode.it
+kontakt@letscode.it
+2022
 
 """
 
 
+
+
+"""
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 IMORTANT !!!!
@@ -15,20 +24,46 @@ GetReader().write(...)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+"""
+
+
+
 
 
 """
+Saving the last error to a file
+"""
+from App.Utils.ErrorLogger import ErrorLogger
+ErrorLogger()
+
+
+
+
+"""
+Program logs in a file
+"""
 import os
-
-
 import logging
+from datetime import datetime
 logDirectory = 'Data/logs'
 if not os.path.exists(logDirectory):
     os.makedirs(logDirectory)
-logging.basicConfig(filename=logDirectory+'/logs.log', format='%(asctime)s - [%(levelname)s]: %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename=logDirectory+'/' + datetime.today().strftime('%Y-%m-%d') + '.log', format='%(asctime)s - [%(levelname)s]: %(message)s', level=logging.DEBUG)
 logging.info('System starts')
 
 
+
+"""
+Checking md5 checksum of files to find out version
+"""
+from App.Utils.MD5Sum import MD5Sum
+MD5Sum()
+
+
+
+"""
+After clicking Ctrl + C the program shuts down
+"""
 import signal
 def signal_handler(sig, frame):
     print('You pressed Ctrl+C!')
@@ -37,62 +72,49 @@ signal.signal(signal.SIGINT, signal_handler)
 print('Press Ctrl+C if you can close program')
 
 
-import time
 
 
+"""
+peak boot arguments
+"""
 from App.LaunchArguments import LaunchArgumentsInit, LaunchArguments
 print(LaunchArgumentsInit())
 
 
+
+"""
+SQL Start
+"""
 from App.SQL import SQL
 SQL.Init()
 
+
+""" 
+Web server start
+"""
 from App.Web import WebThread
 WebThread.start()
 
-"""
-from App.SocketClient import SocketClientThread, SocketClientSend
-SocketClientThread.start()
-"""
 
+
+"""
+Socket client (connect to sim panel serwer) start
+"""
 from App.SocketClient import SocketClient
 SocketClient.Connect()
 
+
+"""
+Reader start (Connect with SIM hat via USB/uart)
+"""
 from App.Reader import GetReader, CreateReader
 CreateReader.run()
-#if not GetReader().alive:
-#    print("reader not alive")
-
-#Reader.protocol.write("AT",lambda transport,data: print("TEST COMMAND"))
 
 
+"""
+Maintaining the main process
+"""
+import time
 while True:
     time.sleep(1)
 
-
-"""
-with ReaderThread(serial_port, SerialReader) as reader:
-
-    #time.sleep(20)
-    #reader.write("+AT-O-CHUJ",lambda transport,data: print("Ależ chujem jebło"))
-
-    time.sleep(20)
-    #reader.write("AT+CMGF=1",lambda transport,data: print("Przygotowanie do wyslania SMS"))
-    
-    #reader.write("AT+COPS=?",lambda transport,data: print("Nadajniki GSM w poblizu"))
-
-    #reader.write('AT+CMGS="'+UTF16.encode("884167733")+'"\n\r' + UTF16.encode("Hello 1") + chr(26), lambda transport, data: print("Wysylam SMS"))
-    #reader.write('AT+CMGS="'+UTF16.encode("884167733")+'"\n\r' + UTF16.encode("Hello 2") + chr(26), lambda transport, data: print("Wysylam SMS"))
-    #reader.write('AT+CMGS="'+UTF16.encode("884167733")+'"\n\r' + UTF16.encode("Hello 3") + chr(26), lambda transport, data: print("Wysylam SMS"))
-    #reader.write('AT+CMGS="'+UTF16.encode("884167733")+'"\n\r' + UTF16.encode("Hello 4") + chr(26), lambda transport, data: print("Wysylam SMS"))
-
-    
-    while(1):
-        time.sleep(10)
-        #reader.write("AT+CGNSINF",lambda transport,data: print("Lokalizacja GPS"))
-        try:
-            SocketClientSend('keep alive', {'foo': 'bar'})
-        except:
-            print("Send socket message error...")
-        
-"""

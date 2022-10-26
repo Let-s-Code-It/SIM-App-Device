@@ -14,6 +14,8 @@ QueuedCommand = namedtuple('QueuedCommand', ['value', 'callback'])
 
 import logging
 
+
+
 class SerialReader(Protocol):
     """
     Serial port reader customized to communicate with SIM800
@@ -33,6 +35,8 @@ class SerialReader(Protocol):
         self.next_response_callback = None
         self.transport = None
         self.buffer = None
+
+        self.connection_confirmed = False
 
         self.info = {
             'my_phone_number': '',
@@ -86,8 +90,12 @@ class SerialReader(Protocol):
  
         # self.write("ATE0")
 
-        # self.write("ATD*101#;", lambda transport, data: print("")))
         # return
+
+
+
+        self.check_connection()
+
 
         self.write("ATE0", lambda transport, data: print(
             "hide send at command on response"))
@@ -158,25 +166,7 @@ class SerialReader(Protocol):
         self.write("AT+CGPSRST=0", lambda transport, data: print(""))
         """
 
-        #configure mms
-        self.write("AT+CMMSINIT", lambda transport, data: print(""))
-        self.write(
-            'AT+CMMSCURL="http://mms/servlets/mms"',
-            lambda transport,
-            data: print(""))
-        self.write("AT+CMMSCID=1", lambda transport, data: print(""))
-        self.write(
-            'AT+CMMSPROTO="213.158.194.226", 8080',
-            lambda transport,
-            data: print(""))
-        """self.write(
-            'AT+SAPBR=3,1,"Contype","mms"',
-            lambda transport,
-            data: print(""))"""
-        self.write(
-            'AT+SAPBR=3,1,"APN","mms"',
-            lambda transport,
-            data: print(""))
+        self.configure_apn()
 
         self.write("ATD*101#;", lambda transport, data: print("Reading USSD..."))
 
@@ -186,7 +176,40 @@ class SerialReader(Protocol):
         """ Dont remove this command - its verifications :)"""
         self.write("AT", AppHandler.Ready )
         
+    def check_connection(self):
+        self.write("AT", lambda transport, data: transport.confirm_connection()) 
+    def confirm_connection(self):
+        self.connection_confirmed = True
 
+    def configure_apn(self):
+        #configure mms
+        self.write("AT+CMMSINIT", lambda transport, data: print(""))
+
+        if SQL.Get('url_mms_center'):
+            self.write(
+                'AT+CMMSCURL="' + SQL.Get('url_mms_center') + '"',
+                lambda transport,
+                data: print(""))
+
+        self.write("AT+CMMSCID=1", lambda transport, data: print(""))
+
+
+        if SQL.Get('ip_mms_proxy') and SQL.Get('port_mms_proxy'):
+            self.write(
+                'AT+CMMSPROTO="' + SQL.Get('ip_mms_proxy') + '", ' + SQL.Get('port_mms_proxy'),
+                lambda transport,
+                data: print(""))
+
+        """self.write(
+            'AT+SAPBR=3,1,"Contype","mms"',
+            lambda transport,
+            data: print(""))"""
+
+        if SQL.Get('apn_name'):
+            self.write(
+                'AT+SAPBR=3,1,"APN","' + SQL.Get('apn_name') + '"',
+                lambda transport,
+                data: print(""))
 
     def connection_made(self, transport):
         """
@@ -338,3 +361,8 @@ class SerialReader(Protocol):
             "message": message
         })
         self.send_sms(message['recipient'], message['text'])
+
+    def stop(self):
+        print("stop function - todo...")
+        #self.transport.terminate()
+        

@@ -38,6 +38,8 @@ def start_reader():
 
 			print("Serial port READY.")
 
+			#serial_port.close()
+
 			break
 
 		except SerialException:

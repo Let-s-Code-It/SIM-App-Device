@@ -1,0 +1,32 @@
+{% include 'Includes/head.html' %}
+
+  <script>
+
+  </script>
+
+    <br>
+
+    <br>
+
+    {% if last_error %}
+    <h3>Last error ({{last_error_crated_time}})</h3>
+    <textarea readonly type="text" placeholder="Text" name="text" required style="height:300px">{{last_error}}</textarea>
+    {% endif %}
+
+    <br><hr><br>
+    
+    <form method=post>
+      <!--
+        NOT WORKING ... ;c
+        <button name=submit class="btn btn-block btn-danger" value="reboot">Reboot</button>
+      -->
+      <br>
+      <button name=submit class="btn btn-block btn-danger" value="shutdown">Shut down</button>
+    </form>
+
+    <br><hr><br>
+
+    <br><a  class="a-btn" href="/debug/comands_in_queue"><button class="btn btn-block btn-primary">Commands in queue</button></a>
+
+  </div>
+{% include 'Includes/footer.html' %}

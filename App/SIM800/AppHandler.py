@@ -33,6 +33,8 @@ class AppHandler:
 
         self.reader.bind_event("+CMGS", AppHandler.message_sent)
 
+        self.reader.bind_event("NORMAL POWER DOWN", AppHandler.ReaderShutDown)
+
 
 
     @staticmethod
@@ -174,6 +176,6 @@ class AppHandler:
             else:
                 SocketClient.MessageNotSent(data['message'], reason)
 
-
-
-
+    @staticmethod
+    def ReaderShutDown(transport, data):
+        raise Exception("the device announced that it turned off...")

@@ -24,6 +24,12 @@ import serial.tools.list_ports
 
 from App.Device import Device
 
+from App.Utils.RestartProgram import RestartProgram
+
+from App.Utils.modification_date import modification_date
+
+from App.APN import apn_configured_check, apn_keys_list, get_apn_data
+
 app = Flask(__name__, template_folder='../Assets/Templates')
 
 app.secret_key = 'super secret key ' + ( datetime.today().strftime('%Y-%m-%d %H:%M:%S') if LaunchArguments.authorization > 1 else "" )
@@ -85,11 +91,14 @@ def controller_configuration():
         if "address" in request.form:
             SocketClient.UpdateAddress(request.form["address"])
 
-        SocketClient.Reload() #TODO: ponownie połączyć socket
+        SocketClient.Reload()
 
         return redirect(url_for('index'))
     else:
-        return render_template('controller_configuration.html', address=SQL.Get("socket_address"))
+        return render_template('controller_configuration.html', 
+        address=SQL.Get("socket_address"), 
+        socket_logged = 'true' if SocketClient.Logged else 'false'
+        )
 
 
 @app.route('/send_sms', methods = ['GET', 'POST'])
@@ -117,7 +126,8 @@ def json_data():
         "socket_connected": SocketClient.IsConnected(),
         "socket_logged" : SocketClient.Logged,
         "device_adopted": Device.Adopted,
-
+        "apn_configured": apn_configured_check(),
+        "connection_confirmed": GetReader().protocol.connection_confirmed if GetReader() != None else False,
 
 
         "time_now" : datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
@@ -141,6 +151,12 @@ def config():
                 SQL.Set('port_name', port[0])
                 SQL.Set('port_friendly_name', port[1])
                 #TODO: Po zmianie portu zresetowac polaczenie serial.
+
+        for apn_key in apn_keys_list:
+            if request.form[apn_key]:
+                SQL.Set(apn_key, request.form[apn_key])
+                #TODO: po zmianie apn resetowac polaczenie z serial lub wprowadzic ponownie komendy od apn.
+                #GetReader().protocol.configure_apn() ....
         
         return redirect(url_for('index'))
     else:
@@ -156,12 +172,43 @@ def config():
                 {"title": "IP MMS Proxy", "name": "ip_mms_proxy"},
                 {"title": "PORT MMS Proxy", "name": "port_mms_proxy"},
                 {"title": "APN Name", "name": "apn_name"},
-            ], apn_mms_templates=apn_mms_templates, ports=serial.tools.list_ports.comports(), target_port=SQL.Get("port_name"))
+            ], 
+            apn_mms_templates=apn_mms_templates, 
+            ports=serial.tools.list_ports.comports(), 
+            target_port=SQL.Get("port_name"),
+            apn_data=get_apn_data()
+        )
 
 
+@app.route('/debug_options', methods = ['GET'])
+def debug_options():
+    
+    last_error_path = "Data/errors/last.txt"
+    if os.path.exists(last_error_path):
+        f = open(last_error_path)
+        last_error = f.read()
+        f.close()
+    else:
+        last_error = None
 
+    return render_template('debug_options.html', last_error=last_error, last_error_crated_time=modification_date(last_error_path))
 
+@app.route('/debug_options', methods = ['POST'])
+def debug_options_post():
+    if request.form['submit'] == 'shutdown':
+        os._exit(0)
+    elif request.form['submit'] == 'reboot':
+        #RestartProgram()
+        GetReader().kill()
 
+    return redirect(url_for('index'))
+
+@app.route('/debug/comands_in_queue', methods = ['GET'])
+def commands_in_queue():
+    return render_template('commands_in_queue.html')
+@app.route('/debug/comands_in_queue/json', methods = ['GET'])
+def commands_in_queue_json():
+    return list(map(lambda x: x.value, GetReader().protocol.queue))
 
 def WebStart():
     try:
