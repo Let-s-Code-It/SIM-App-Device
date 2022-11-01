@@ -6,15 +6,15 @@ import time
 
 from datetime import datetime
 
-from App.SocketClient import SocketClient
+from .SocketClient import SocketClient
 
-from App.Reader import GetReader
+from .Reader import GetReader
 
-from App.SQL import SQL
+from .SQL import SQL
 
-from App.SocketClient import SocketClient
+from .SocketClient import SocketClient
 
-from App.LaunchArguments import LaunchArguments
+from .LaunchArguments import LaunchArguments
 
 import os
 
@@ -22,27 +22,33 @@ import json
 
 import serial.tools.list_ports
 
-from App.Device import Device
+from .Device import Device
 
-from App.Utils.RestartProgram import RestartProgram
+from .Utils.RestartProgram import RestartProgram
 
-from App.Utils.modification_date import modification_date
+from .Utils.modification_date import modification_date
 
-from App.APN import apn_configured_check, apn_keys_list, get_apn_data
+from .APN import apn_configured_check, apn_keys_list, get_apn_data
 
-app = Flask(__name__, template_folder='../Assets/Templates')
+from ..Config import __APPLICATION_DATA__,  __APPLICATION_PATH__, __VERSION__, __PYPI_PACKAGE_NAME__, __AUTHOR_PAGE__, __HOW_TO_UPDATE_PAGE__
 
-app.secret_key = 'super secret key ' + ( datetime.today().strftime('%Y-%m-%d %H:%M:%S') if LaunchArguments.authorization > 1 else "" )
+app = Flask(__name__, template_folder=__APPLICATION_PATH__+'/Assets/Templates')
 
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
+restart_required = False
+
 @app.context_processor
 def inject_stage_and_region():
     return {
-        'version': {'tag':'2.0'},
-        'endpoint': request.endpoint
+        'version': {'tag':__VERSION__},
+        'endpoint': request.endpoint,
+        'pypi_package_name': __PYPI_PACKAGE_NAME__,
+        'author_page': __AUTHOR_PAGE__,
+        'how_to_update_page': __HOW_TO_UPDATE_PAGE__,
+        'restart_required': restart_required,
     }
 
 
@@ -150,19 +156,21 @@ def config():
             if port[0] == request.form['serial_port']:
                 SQL.Set('port_name', port[0])
                 SQL.Set('port_friendly_name', port[1])
-                #TODO: Po zmianie portu zresetowac polaczenie serial.
 
         for apn_key in apn_keys_list:
             if request.form[apn_key]:
                 SQL.Set(apn_key, request.form[apn_key])
-                #TODO: po zmianie apn resetowac polaczenie z serial lub wprowadzic ponownie komendy od apn.
-                #GetReader().protocol.configure_apn() ....
+
+        global restart_required
+        
+        if GetReader() != None:
+            restart_required = True
         
         return redirect(url_for('index'))
     else:
         apn_mms_templates = []
         try:
-            apn_mms_templates = json.loads(open("Assets/apn_mms_templates.json", "r").read() if os.path.exists("Assets/apn_mms_templates.json") else "[]")
+            apn_mms_templates = json.loads(open(__APPLICATION_PATH__ + "/Assets/apn_mms_templates.json", "r").read() if os.path.exists( __APPLICATION_PATH__ + "/Assets/apn_mms_templates.json") else "[]")
         except ValueError as e:
             pass
 
@@ -183,7 +191,7 @@ def config():
 @app.route('/debug_options', methods = ['GET'])
 def debug_options():
     
-    last_error_path = "Data/errors/last.txt"
+    last_error_path = __APPLICATION_DATA__ + "/errors/last.txt"
     if os.path.exists(last_error_path):
         f = open(last_error_path)
         last_error = f.read()
@@ -212,6 +220,9 @@ def commands_in_queue_json():
 
 def WebStart():
     try:
+        print("launch arguments when web start:")
+        print(LaunchArguments)
+        app.secret_key = 'super secret key ' + ( datetime.today().strftime('%Y-%m-%d %H:%M:%S') if LaunchArguments.authorization > 1 else "" )
         app.run(debug=False, host='0.0.0.0', port=LaunchArguments.webport)
     except:
         print("WebServer start problem!")

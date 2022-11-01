@@ -3,9 +3,11 @@ from pathlib import Path
 import hashlib
 import os
 
+from ...Config import __APPLICATION_PATH__, __APPLICATION_MD5SUM__
+
 def MD5Sum():
 
-    fp = open(os.path.join('md5sum.txt'), 'w')
+    fp = open(__APPLICATION_MD5SUM__, 'w')
 
     dir_path = r'App/**'
     for file in glob.glob(dir_path, recursive=True):

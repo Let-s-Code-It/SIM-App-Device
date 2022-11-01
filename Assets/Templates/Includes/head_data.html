@@ -1,7 +1,19 @@
 
+<div class="alert alert-warning" style="display: none" id="update-available-alert">
+    <p>A new version (<span id="new-update-version">0.0.0</span>) of the software is available.</p>
+    <p>Go to <a target="_blank" href="{{how_to_update_page}}">PAGE</a> to learn more about the update.</p>
+</div>
+
 <div class="alert" id="global-alert">
     Loading data...
 </div>
+
+{% if restart_required %}
+<div class="alert alert-warning">
+    <p>The configuration has changed.</p>
+    <p>Application restart required</p>
+</div>
+{% endif %}
 
 <br>
 

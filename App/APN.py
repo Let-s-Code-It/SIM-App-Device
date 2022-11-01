@@ -1,4 +1,4 @@
-from App.SQL import SQL
+from .SQL import SQL
 
 apn_keys_list = ['friendly_apn_mms_name', 'url_mms_center', 'ip_mms_proxy', 'port_mms_proxy', 'apn_name']
 

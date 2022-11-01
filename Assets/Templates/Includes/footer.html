@@ -113,17 +113,51 @@
 				console.log('loopRequest catch:', e)
 				
 			} finally {
-				setTimeout(loopRequest, 5 * 1000)
+				setTimeout(loopRequest, 2 * 1000)
 			}
 		}
 
 		loopRequest()
 
+
+		function checkForUpdate() {
+			try {
+				const req = new XMLHttpRequest();
+				req.addEventListener("load", function(){
+					const ob = JSON.parse(this.responseText)
+					console.log('package data', ob)
+					if("info" in ob && "version" in ob.info && ob.info.version != '{{version.tag}}' && '{{version.tag}}' != '0.0.0') {
+						const new_version = ob.info.version;
+						const new_version_el = document.getElementById("new-update-version");
+						new_version_el.innerHTML = new_version;
+
+						const new_version_alert = document.getElementById("update-available-alert");
+						new_version_alert.style.display = 'block';
+
+					}
+				});
+
+				req.onerror = function(e){
+				    
+				};
+
+				req.open("GET", "https://pypi.org/pypi/{{pypi_package_name}}/json");
+				req.send();
+			} catch(e) {
+				console.log('checkForUpdate catch:', e)
+				
+			} finally {
+				setTimeout(checkForUpdate, 60 * 1000 * 10)
+			}
+		}
+
+		checkForUpdate()
+
 	</script>
 	{% endif %}
 
 	<footer>
-		Created by <a target=_blank href="https://www.letscode.it">Karol Sójka</a>, from Poland.
+		Created by <a target=_blank href="{{author_page}}">Karol Sójka</a>, from Poland.
 	</footer>
 
 </html>

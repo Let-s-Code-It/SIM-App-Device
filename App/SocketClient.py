@@ -2,11 +2,11 @@ import socketio
 from threading import Thread
 import time
 
-from App.SQL import SQL
+from .SQL import SQL
 
-from App.Utils.SystemInfo import getSystemInfo
+from .Utils.SystemInfo import getSystemInfo
 
-from App.Device import Device
+from .Device import Device
 
 import logging
 

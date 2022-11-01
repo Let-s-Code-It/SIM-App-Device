@@ -5,6 +5,8 @@ import time
 
 import threading
 
+from ..Config import __APPLICATION_DATA__, __DEFAULT_CONTROLLER_SOCKET__, __APPLICATION_DATABASE_PATH__
+
 lock = threading.Lock()
 
 
@@ -24,15 +26,12 @@ class SQL():
 	@staticmethod
 	def Init():
 
-		if not os.path.exists("Data/"):
-			os.makedirs("Data/")
-
-		SQL.conn = sqlite3.connect('Data/sim.db', check_same_thread=False)
+		SQL.conn = sqlite3.connect(__APPLICATION_DATABASE_PATH__, check_same_thread=False)
 		SQL.c = SQL.conn.cursor()
 
 		print("DB CONNECTED")
 
-		if os.stat("Data/sim.db").st_size == 0:
+		if os.stat(__APPLICATION_DATABASE_PATH__).st_size == 0:
 			print("Configure data base...")
 			SQL.c.execute('CREATE TABLE sms (row_id INTEGER PRIMARY KEY, number, text, date, time)')
 			SQL.c.execute('CREATE TABLE mms (row_id INTEGER PRIMARY KEY, number, date, time, unique_id, file BLOB, file_type, file_name)')
@@ -43,7 +42,7 @@ class SQL():
 
 			SQL.conn.commit()
 
-			SQL.Set('socket_address', 'http://srv01.letscode.it:9851/')
+			SQL.Set('socket_address', __DEFAULT_CONTROLLER_SOCKET__)
 
 	"""
 	@staticmethod

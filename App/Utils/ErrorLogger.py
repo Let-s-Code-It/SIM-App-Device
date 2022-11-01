@@ -4,16 +4,16 @@ import traceback
 import os 
 from datetime import datetime
 import logging
+from ...Config import __APPLICATION_DATA__
 """
 If any process returns an error while the application is running, 
 the program will end and an error file will be created 
 in the default folder Data/errors/.
 """
 
-
 def ErrorLogger():
     
-    logDirectory = 'Data/errors'
+    logDirectory = __APPLICATION_DATA__ + '/errors'
     
     if not os.path.exists(logDirectory):
         os.makedirs(logDirectory)

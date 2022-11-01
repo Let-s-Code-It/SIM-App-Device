@@ -2,13 +2,13 @@ from serial.threaded import ReaderThread, Protocol
 from collections import namedtuple
 import time
 
-from App.SIM800.AppHandler import AppHandler
+from .AppHandler import AppHandler
 
-from App.Utils.UTF16 import UTF16
+from ..Utils.UTF16 import UTF16
 
-from App.SocketClient import SocketClient
+from ..SocketClient import SocketClient
 
-from App.SQL import SQL
+from ..SQL import SQL
 
 QueuedCommand = namedtuple('QueuedCommand', ['value', 'callback'])
 

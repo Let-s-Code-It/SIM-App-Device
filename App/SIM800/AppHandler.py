@@ -1,10 +1,10 @@
-from App.Utils.UTF16 import UTF16
+from ..Utils.UTF16 import UTF16
 
-from App.SQL import SQL
+from ..SQL import SQL
 
 import time
 
-from App.SocketClient import SocketClient
+from ..SocketClient import SocketClient
 
 import logging
 

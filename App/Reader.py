@@ -2,16 +2,16 @@ from serial import Serial, SerialException
 from serial.threaded import ReaderThread
 
 
-from App.SIM800.SerialReader import SerialReader
+from .SIM800.SerialReader import SerialReader
 
-from App.SQL import SQL
+from .SQL import SQL
 
 
 from threading import Thread
 
 import time
 
-from App.SQL import SQL
+from .SQL import SQL
 
 import serial.tools.list_ports
 
