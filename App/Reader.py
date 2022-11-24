@@ -15,9 +15,11 @@ from .SQL import SQL
 
 import serial.tools.list_ports
 
-print("Reader.py - LOADED")
-
 Reader = None
+
+from .Logger import logger
+
+logger.debug("Reader.py - LOADED")
 
 def start_reader():
 
@@ -36,7 +38,7 @@ def start_reader():
 			Reader.start()
 			#Reader._connection_made.wait()
 
-			print("Serial port READY.")
+			logger.debug("Serial port READY.")
 
 			#serial_port.close()
 
@@ -44,13 +46,13 @@ def start_reader():
 
 		except SerialException:
 			Reader = None
-			print(" !!! ---> Reader not created! (wrong serial port)")
+			logger.debug(" !!! ---> Reader not created! (wrong serial port)")
 
 			if TryOtherPorts and PortFriendlyName != "":
 				for port in serial.tools.list_ports.comports():
 					if port[1] == PortFriendlyName:
 						PortName = port[0]
-						print("Serial port connection error: Trying other port -> " + PortName + "("+port[1]+")")
+						logger.debug("Serial port connection error: Trying other port -> " + PortName + "("+port[1]+")")
 						return
 
 			PortName = SQL.Get('port_name')

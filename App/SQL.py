@@ -5,6 +5,8 @@ import time
 
 import threading
 
+from .Logger import logger
+
 from ..Config import __APPLICATION_DATA__, __DEFAULT_CONTROLLER_SOCKET__, __APPLICATION_DATABASE_PATH__
 
 lock = threading.Lock()
@@ -29,10 +31,10 @@ class SQL():
 		SQL.conn = sqlite3.connect(__APPLICATION_DATABASE_PATH__, check_same_thread=False)
 		SQL.c = SQL.conn.cursor()
 
-		print("DB CONNECTED")
+		logger.debug("DB CONNECTED")
 
 		if os.stat(__APPLICATION_DATABASE_PATH__).st_size == 0:
-			print("Configure data base...")
+			logger.debug("Configure data base...")
 			SQL.c.execute('CREATE TABLE sms (row_id INTEGER PRIMARY KEY, number, text, date, time)')
 			SQL.c.execute('CREATE TABLE mms (row_id INTEGER PRIMARY KEY, number, date, time, unique_id, file BLOB, file_type, file_name)')
 			SQL.c.execute('CREATE TABLE incomming_calls (row_id INTEGER PRIMARY KEY, number, status, date, time)')

@@ -38,6 +38,9 @@ import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
+
+from .Logger import logger
+
 restart_required = False
 
 @app.context_processor
@@ -220,12 +223,12 @@ def commands_in_queue_json():
 
 def WebStart():
     try:
-        print("launch arguments when web start:")
-        print(LaunchArguments)
+        logger.debug("launch arguments when web start:")
+        logger.debug(LaunchArguments)
         app.secret_key = 'super secret key ' + ( datetime.today().strftime('%Y-%m-%d %H:%M:%S') if LaunchArguments.authorization > 1 else "" )
         app.run(debug=False, host='0.0.0.0', port=LaunchArguments.webport)
     except:
-        print("WebServer start problem!")
+        logger.debug("WebServer start problem!")
 
 
 WebThread = Thread(target=WebStart)

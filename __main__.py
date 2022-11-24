@@ -56,8 +56,7 @@ from .App.Utils.ErrorLogger import ErrorLogger
 Program logs in a file
 """
 
-import logging
-from datetime import datetime
+from .App.Logger import logger
 
 
 
@@ -120,11 +119,7 @@ if __name__ == "__main__":
 	ErrorLogger()
 
 
-	logDirectory = __APPLICATION_DATA__ + '/logs'
-	if not os.path.exists(logDirectory):
-	    os.makedirs(logDirectory)
-	logging.basicConfig(filename=logDirectory+'/' + datetime.today().strftime('%Y-%m-%d') + '.log', format='%(asctime)s - [%(levelname)s]: %(message)s', level=logging.DEBUG)
-	logging.info('System starts')
+	logger.info('System starts')
 
 
 	MD5Sum()

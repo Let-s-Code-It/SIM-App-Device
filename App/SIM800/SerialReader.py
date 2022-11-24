@@ -12,7 +12,7 @@ from ..SQL import SQL
 
 QueuedCommand = namedtuple('QueuedCommand', ['value', 'callback'])
 
-import logging
+from ..Logger import logger
 
 
 
@@ -54,7 +54,7 @@ class SerialReader(Protocol):
         Bind new handler for given event
         """
 
-        print('bind_event')
+        logger.debug('bind_event')
         if event not in self.callbacks:
             self.callbacks[event] = [callback]
         else:
@@ -65,7 +65,7 @@ class SerialReader(Protocol):
         Add new queued command
         """
 
-        print("New queued command (" + data +  ")")
+        logger.debug("New queued command (" + data +  ")")
         if not callback:
             def callback(transport):
                 return None
@@ -73,7 +73,7 @@ class SerialReader(Protocol):
         self.queue.append(QueuedCommand(data, callback))
 
         if self.transport:
-            logging.debug("send_queued in write")
+            logger.debug("send_queued in write")
             self.send_queued()
 
     def reconfigure(self):
@@ -81,7 +81,7 @@ class SerialReader(Protocol):
         Reconfigure SIM800 with our default settings
         """
 
-        print('reconfigure')
+        logger.debug('reconfigure')
 
 
         #self.write('\x1A', lambda transport,data: print("CTRL+z"))
@@ -97,17 +97,17 @@ class SerialReader(Protocol):
         self.check_connection()
 
 
-        self.write("ATE0", lambda transport, data: print(
+        self.write("ATE0", lambda transport, data: logger.debug(
             "hide send at command on response"))
-        self.write("AT", lambda transport, data: print("AT callback :)"))
-        self.write("ATZ", lambda transport, data: print("Factory reset"))
+        self.write("AT", lambda transport, data: logger.debug("AT callback :)"))
+        self.write("ATZ", lambda transport, data: logger.debug("Factory reset"))
         self.write("AT+CFUN=1,1", lambda transport, data: time.sleep(5))
 
-        self.write("ATE0", lambda transport, data: print(
+        self.write("ATE0", lambda transport, data: logger.debug(
             "hide send at command on response"))
 
-        self.write("AT+CMEE=2", lambda transport, data: print("Show errors"))
-        self.write("AT+CPIN?", lambda transport, data: print("PIN/SIM status"))
+        self.write("AT+CMEE=2", lambda transport, data: logger.debug("Show errors"))
+        self.write("AT+CPIN?", lambda transport, data: logger.debug("PIN/SIM status"))
 
         # Before (mode=1, text):
         #   self.queue.append(QueuedCommand('AT+CMGDA="DEL ALL"', lambda
@@ -116,7 +116,7 @@ class SerialReader(Protocol):
         self.write(
             'AT+CMGDA=6',
             lambda transport,
-            data: print("Dell All SMS fro memory"))
+            data: logger.debug("Dell All SMS fro memory"))
 
         self.write("AT+GSN", AppHandler.save_serial_number)
         
@@ -126,32 +126,32 @@ class SerialReader(Protocol):
         self.write(
             "ATH",
             lambda transport,
-            data: print("End call ( if exist ;) )"))
-        self.write("ATS0=0", lambda transport, data: print(
+            data: logger.debug("End call ( if exist ;) )"))
+        self.write("ATS0=0", lambda transport, data: logger.debug(
             "Automatic connection reception - FALSE"))
         self.write(
             "AT+DDET=1,100,0,0",
             lambda transport,
-            data: print("Tone Dialling"))
-        self.write("AT+CRSL=0", lambda transport, data: print("Call volume 0"))
-        self.write("AT+CLIP=1", lambda transport, data: print("Caller info"))
+            data: logger.debug("Tone Dialling"))
+        self.write("AT+CRSL=0", lambda transport, data: logger.debug("Call volume 0"))
+        self.write("AT+CLIP=1", lambda transport, data: logger.debug("Caller info"))
         self.write(
             'AT+CSCS="UCS2"',
             lambda transport,
-            data: print("encoding the message to UCS2"))
-        self.write("AT+CMGF=1", lambda transport, data: print(""))
+            data: logger.debug("encoding the message to UCS2"))
+        self.write("AT+CMGF=1", lambda transport, data: logger.debug(""))
         self.write(
             "AT+CSAS=0",
             lambda transport,
-            data: print("for CSMP work..."))
+            data: logger.debug("for CSMP work..."))
         self.write(
             "AT+CSMP=17,167,2,25",
             lambda transport,
-            data: print("utf8 etc...."))
+            data: logger.debug("utf8 etc...."))
         self.write(
             "AT+CUSD=1",
             lambda transport,
-            data: print("card operator message"))
+            data: logger.debug("card operator message"))
 
         # Configure GPS
         
@@ -168,7 +168,7 @@ class SerialReader(Protocol):
 
         self.configure_apn()
 
-        self.write("ATD*101#;", lambda transport, data: print("Reading USSD..."))
+        self.write("ATD*101#;", lambda transport, data: logger.debug("Reading USSD..."))
 
 
 
@@ -183,22 +183,22 @@ class SerialReader(Protocol):
 
     def configure_apn(self):
         #configure mms
-        self.write("AT+CMMSINIT", lambda transport, data: print(""))
+        self.write("AT+CMMSINIT", lambda transport, data: logger.debug(""))
 
         if SQL.Get('url_mms_center'):
             self.write(
                 'AT+CMMSCURL="' + SQL.Get('url_mms_center') + '"',
                 lambda transport,
-                data: print(""))
+                data: logger.debug(""))
 
-        self.write("AT+CMMSCID=1", lambda transport, data: print(""))
+        self.write("AT+CMMSCID=1", lambda transport, data: logger.debug(""))
 
 
         if SQL.Get('ip_mms_proxy') and SQL.Get('port_mms_proxy'):
             self.write(
                 'AT+CMMSPROTO="' + SQL.Get('ip_mms_proxy') + '", ' + SQL.Get('port_mms_proxy'),
                 lambda transport,
-                data: print(""))
+                data: logger.debug(""))
 
         """self.write(
             'AT+SAPBR=3,1,"Contype","mms"',
@@ -209,17 +209,24 @@ class SerialReader(Protocol):
             self.write(
                 'AT+SAPBR=3,1,"APN","' + SQL.Get('apn_name') + '"',
                 lambda transport,
-                data: print(""))
+                data: logger.debug(""))
 
     def connection_made(self, transport):
         """
         Serial port connection made
         """
 
-        print('connection_made')
+        logger.debug('connection_made')
         self.transport = transport
 
-        logging.debug("send_queued in connection_made")
+
+        #CTRL+Z
+        self.transport.write(str.encode('\x1A'))
+        time.sleep(1)
+
+        
+
+        logger.debug("send_queued in connection_made")
         self.send_queued()
 
     def send_queued(self):
@@ -234,13 +241,18 @@ class SerialReader(Protocol):
             return False
 
         queued_command = self.queue.pop(0)
+
+        self.next_response_callback = queued_command.callback
+
         self.last_command = queued_command
         self.transport.write(str.encode(queued_command.value) + b'\n')
         
-        logging.debug("Command sended: " + queued_command.value )
+        logger.debug("Command sended: " + queued_command.value )
         
-        self.next_response_callback = queued_command.callback
-        print("SENT QUEUED COMMAND (" + queued_command.value +  ")")
+        #^^^^^^^
+        #self.next_response_callback = queued_command.callback
+        
+        logger.debug("SENT QUEUED COMMAND (" + queued_command.value +  ")")
         time.sleep(1)
 
         return True
@@ -251,7 +263,7 @@ class SerialReader(Protocol):
         """
 
         if self.next_response_callback:
-            print([line for line in lines if self.is_error(line)])
+            logger.debug([line for line in lines if self.is_error(line)])
             if 'OK' in lines:
                 if self.next_response_callback.__code__.co_argcount == 2:
                     index = lines.index('OK')
@@ -286,7 +298,7 @@ class SerialReader(Protocol):
         New serial data received
         """
 
-        print(data)
+        logger.debug(data)
         if b'\xFF' in data:
             return
         self.buffer = ('' if self.buffer is None else self.buffer)
@@ -310,12 +322,12 @@ class SerialReader(Protocol):
         self.buffer = None
 
         if len(lines) == 0:
-            logging.debug("send_queued in data_received (if len(lines) == 0)")
+            logger.debug("send_queued in data_received (if len(lines) == 0)")
             self.send_queued()
             return
             
-        print("Received: \n\t" + '\n\t'.join(lines) + "\n")
-        logging.debug("data_Received: \n\t" + '\n\t'.join(lines) + "\n")
+        #print("Received: \n\t" + '\n\t'.join(lines) + "\n")
+        logger.debug("data_Received: \n\t" + '\n\t'.join(lines) + "\n")
 
         i = 0
         while i < len(lines):
@@ -331,7 +343,8 @@ class SerialReader(Protocol):
 
             line = '\n'.join(lines[i:j])
             i = j
-            print(line)
+
+            logger.debug(line)
 
             parts = line.split(':', 1)
             data = ""
@@ -347,13 +360,13 @@ class SerialReader(Protocol):
                 for callback in self.callbacks[action]:
                     callback(self, data)
             else:
-                print("No callback defined for action '" + action + "'")
+                logger.debug("No callback defined for action '" + action + "'")
 
-        logging.debug("send_queued in data_received")
+        logger.debug("send_queued in data_received")
         self.send_queued()
 
     def send_sms(self, number, text):
-        print(["SEND SMS HANDLER", number, text])
+        logger.debug(["SEND SMS HANDLER", number, text])
         self.write('AT+CMGS="'+UTF16.encode(number)+'"\n\r' + UTF16.encode(text) + chr(26) )
 
     def send_sms_from_panel(self, message):
@@ -363,6 +376,6 @@ class SerialReader(Protocol):
         self.send_sms(message['recipient'], message['text'])
 
     def stop(self):
-        print("stop function - todo...")
+        logger.debug("stop function - todo...")
         #self.transport.terminate()
         

@@ -6,7 +6,7 @@ import time
 
 from ..SocketClient import SocketClient
 
-import logging
+from ..Logger import logger
 
 class AppHandler:
     """
@@ -39,7 +39,7 @@ class AppHandler:
 
     @staticmethod
     def Ready(transport, data):
-        print("Reader Ready.")
+        logger.debug("Reader Ready.")
         transport.Ready = True
         SocketClient.Readers.append(transport)
         SocketClient.SendReadersInfo()
@@ -51,12 +51,12 @@ class AppHandler:
         New ussd code event handler
         """
 
-        print("NEW USSD CODE :)")
+        logger.debug("NEW USSD CODE :)")
         l = data.split('"')
         if len(l) > 1:
             msg = l[1]
             message = UTF16.decode(msg)
-            print(message)
+            logger.debug(message)
 
             SocketClient.emit("ussd received", {
                 "sim": transport.info,
@@ -66,8 +66,8 @@ class AppHandler:
             })
 
         else:
-            print("USSD PROBLEM:")
-            print(data)
+            logger.debug("USSD PROBLEM:")
+            logger.debug(data)
 
     @staticmethod
     def new_msg_incoming(transport, data):
@@ -80,11 +80,11 @@ class AppHandler:
 
         if len(parts) > 2 and "MMS PUSH" in parts[2]:
 
-            print("NEW MMS INCOMING: " + sms_id)
-            print(parts)
+            logger.debug("NEW MMS INCOMING: " + sms_id)
+            logger.debug(parts)
             #return
             if parts[4] != '2' or parts[3] != '2' :
-                print("MMS ostatni argumnet jest inny niz 2: " + parts[4])
+                logger.debug("MMS ostatni argumnet jest inny niz 2: " + parts[4])
                 return
 
             transport.write("AT+SAPBR=1,1", lambda transport,
@@ -93,7 +93,7 @@ class AppHandler:
             data: time.sleep(2))
             transport.write("AT+CMMSRECV=" + sms_id)
         else:
-            print("NEW SMS INCOMING: " + sms_id)
+            logger.debug("NEW SMS INCOMING: " + sms_id)
             transport.write("AT+CMGR=" + sms_id)
 
     @staticmethod
@@ -114,14 +114,14 @@ class AppHandler:
         else:
             msg = "[EMPTY_MESSAGE]"
 
-        print("Reading sms...")
-        print(data)
-        print(number)
-        print(date)
-        print(t)
-        print(msg)
+        logger.debug("Reading sms...")
+        logger.debug(data)
+        logger.debug(number)
+        logger.debug(date)
+        logger.debug(t)
+        logger.debug(msg)
 
-        transport.write('AT+CMGDA="DEL READ"', lambda transport, data: print("Delete all read messages"))
+        transport.write('AT+CMGDA="DEL READ"', lambda transport, data: logger.debug("Delete all read messages"))
 
         SQL.add_sms(number, msg, date, t)
 
@@ -143,9 +143,9 @@ class AppHandler:
         Handler for errors
         """
 
-        print("Blont: " + data + ", po wykonaniu: " + transport.last_command.value + " :)")
+        logger.debug("Blont: " + data + ", po wykonaniu: " + transport.last_command.value + " :)")
 
-        logging.error('CMS/CME: ' + data + '(after ' + transport.last_command.value + ')')
+        logger.error('CMS/CME: ' + data + '(after ' + transport.last_command.value + ')')
 
         #transport.last_command.callbackError(transport, data)
         AppHandler.update_message_status_if_exist(transport, False, data)
@@ -154,13 +154,13 @@ class AppHandler:
     @staticmethod
     def save_my_phone_number(transport, data):
         l = data.split('"')
-        print("Save my phone number...")
-        print(l)
+        logger.debug("Save my phone number...")
+        logger.debug(l)
         transport.info['my_phone_number'] = l[3]
 
     @staticmethod
     def save_serial_number(transport, data):
-        print(["Serial number", data])
+        logger.debug(["Serial number", data])
         transport.info['serial_number'] = data[0]
 
     @staticmethod

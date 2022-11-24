@@ -1,0 +1,2 @@
+2022-11-20 22:22:00 INFO     This is a message!
+2022-11-20 22:22:00 DEBUG    Debug message :)
