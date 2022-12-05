@@ -107,9 +107,10 @@ def start_socket():
             AtLeastOnceConnected = True
             break
         except socketio.exceptions.ConnectionError:
-            logger.debug("Socket Connection Error!")
-        except:
-            logger.debug("Socket Error: Other....")
+            logger.error("Socket Connection Error!")
+        except Exception as e:
+            logger.error("Socket Error: Other... ")
+            logger.error(e)
         finally:
             time.sleep(10)
 

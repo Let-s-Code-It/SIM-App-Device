@@ -21,7 +21,7 @@ print("application data file path", __APPLICATION_DATA__)
 __APPLICATION_MD5SUM__ = __APPLICATION_PATH__ + '/md5sum.txt'
 __APPLICATION_DATABASE_PATH__ = __APPLICATION_DATA__ + "/sim.db"
 
-__DEFAULT_CONTROLLER_SOCKET__ 	= 'http://srv01.letscode.it:9851/'
+__DEFAULT_CONTROLLER_SOCKET__ 	= 'https://panel.sim-app.ovh/engine'
 __PYPI_PACKAGE_NAME__ 			= 'lci-sim-app-device'
 __AUTHOR_PAGE__ 				= 'https://github.com/Let-s-Code-It/SIM-App-Device'
 __HOW_TO_UPDATE_PAGE__			= 'https://github.com/Let-s-Code-It/SIM-App-Device'
