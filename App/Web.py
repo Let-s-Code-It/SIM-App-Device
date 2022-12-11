@@ -1,6 +1,6 @@
 from threading import Thread
 
-from flask import Flask, request, render_template, url_for, redirect, url_for, json, session
+from flask import Flask, request, render_template, url_for, redirect, url_for, json, session, send_from_directory
 
 import time
 
@@ -32,7 +32,11 @@ from .APN import apn_configured_check, apn_keys_list, get_apn_data
 
 from ..Config import __APPLICATION_DATA__,  __APPLICATION_PATH__, __VERSION__, __PYPI_PACKAGE_NAME__, __AUTHOR_PAGE__, __HOW_TO_UPDATE_PAGE__
 
-app = Flask(__name__, template_folder=__APPLICATION_PATH__+'/Assets/Templates')
+app = Flask(
+    __name__, 
+    template_folder=__APPLICATION_PATH__+'/Assets/Templates', 
+    static_url_path='/static'
+)
 
 import logging
 log = logging.getLogger('werkzeug')
@@ -42,6 +46,11 @@ log.setLevel(logging.ERROR)
 from .Logger import logger
 
 restart_required = False
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(__APPLICATION_PATH__+'/Assets/static',
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.context_processor
 def inject_stage_and_region():
@@ -106,7 +115,8 @@ def controller_configuration():
     else:
         return render_template('controller_configuration.html', 
         address=SQL.Get("socket_address"), 
-        socket_logged = 'true' if SocketClient.Logged else 'false'
+        socket_logged = 'true' if SocketClient.Logged else 'false',
+        socket_unique_auth_key=SQL.Get("socket_unique_auth_key") if SQL.Get("socket_unique_auth_key") else  SQL.Get("socket_unique_login_key"),
         )
 
 

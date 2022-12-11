@@ -7,7 +7,7 @@
       
       <input id="socket-url" type="text" placeholder="Adress" name="address" required value="{{address}}" readonly blocked disabled />
 
-      <input type="text" placeholder="Login Key, UUID (ex: d2cd2e3d-4da2-4cb5-b2e8-ead9939bacc5)" name="unique_login_key" required />
+      <input id="socket-key" type="text" placeholder="Login Key, UUID (ex: d2cd2e3d-4da2-4cb5-b2e8-ead9939bacc5)" name="unique_login_key" required />
       <!--<textarea name="unique_login_key" placeholder="Login Key (70 chars)" style="min-height:50px"></textarea>-->
       
       <input id="connect-button" type="submit" value="Connect" name="connect" class="btn btn-block btn-primary"/>
@@ -15,15 +15,18 @@
 
     <div id="change_configuration_page" style="display:none">
       <hr>
-      <br>Your device is connected and has successfully logged into the remote controller. 
+      <br>Your device is connected and has successfully logged into the remote controller.
       <br>The configuration has been hidden. If you change it, 
       <br>you will need to reconfigure the device on the controller side. 
       <br>Are you sure you want to do this?
+      <br>[Debug] Login key: ({{socket_unique_auth_key}})
 
       <button onclick="change_configuration()" class="btn btn-block btn-primary">Change Configuration</button>
     </div>
 
     <script>
+
+      const socket_unique_auth_key = '{{socket_unique_auth_key}}';
       const socket_logged = '{{socket_logged}}' == 'true';
       
       const controller_configuration_form = document.getElementById("controller_configuration");
@@ -49,11 +52,18 @@
         clickTimes.push(date_now);
         if(clickTimes.length >= 10 && (date_now - clickTimes.shift()) < 5 * 1000) {
           console.log('kliknales 10 razy w ciagu 5 sekund!');
+          alert('Hidden feature unlocked');
           clickTimes = [];
           const url_input = document.getElementById("socket-url");
           url_input.removeAttribute('readonly');
           url_input.removeAttribute('blocked');
           url_input.removeAttribute('disabled');
+
+          const socket_key_input = document.getElementById("socket-key");
+          socket_key_input.value = socket_unique_auth_key;
+
+          return false;
+
 
         }
 
