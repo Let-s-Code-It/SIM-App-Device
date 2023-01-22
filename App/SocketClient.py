@@ -45,6 +45,7 @@ def on_message(data):
 
 @sio.on('keep alive', namespace='/device')
 def on_message(data):
+    SocketClient.keepAliveLastSentTime = 0
     logger.debug(['Keep Alive response: ', data])
 
 
@@ -128,6 +129,8 @@ class SocketClient:
 
     Readers = []
 
+    keepAliveLastSentTime = 0
+
     @staticmethod
     def Connect():
         SocketClientThread = Thread(target=start_socket)
@@ -149,6 +152,10 @@ class SocketClient:
 
         logger.debug("Update Socket Path... " + address)
 
+
+    @staticmethod
+    def Disconnect():
+        sio.disconnect()
 
     @staticmethod
     def Reload():

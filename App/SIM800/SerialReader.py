@@ -388,5 +388,22 @@ class SerialReader(Protocol):
     def loop(self):
         time.sleep(10)
         self.writeOne("AT+CSQ")
+        self.keepAlive()
         logger.debug("Reader loop :)")
+
+    def keepAlive(self):
+        if not SocketClient.IsConnected():
+            SocketClient.keepAliveLastSentTime = 0
+        elif SocketClient.keepAliveLastSentTime == 0 or (time.time() - SocketClient.keepAliveLastSentTime) < 120:
+            if SocketClient.keepAliveLastSentTime == 0:
+                SocketClient.keepAliveLastSentTime = time.time()
+            logger.debug("Keep alive time: " + str(time.time() - SocketClient.keepAliveLastSentTime))
+            SocketClient.emit("keep alive", {
+                "sim": self.info
+            })
+        else:
+            SocketClient.keepAliveLastSentTime = 0
+            SocketClient.Disconnect()
+            SocketClient.Connect()
+            logger.info("Socket restart - keep alive limit...")
         
