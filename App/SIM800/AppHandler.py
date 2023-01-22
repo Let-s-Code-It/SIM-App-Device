@@ -35,6 +35,10 @@ class AppHandler:
 
         self.reader.bind_event("NORMAL POWER DOWN", AppHandler.ReaderShutDown)
 
+        self.reader.bind_event("+CSQ", AppHandler.SignalStrength)
+
+        self.reader.bind_event("+CLIP", AppHandler.Ring)
+
 
 
     @staticmethod
@@ -179,3 +183,75 @@ class AppHandler:
     @staticmethod
     def ReaderShutDown(transport, data):
         raise Exception("the device announced that it turned off...")
+
+    @staticmethod
+    def SignalStrength(transport, data):
+        rssi, ber = data.split(",")
+
+        rssi = int(rssi)
+
+        # <rssi>
+        # 0 -115 dBm or less
+        # 1 -111 dBm
+        # 2...30 -110... -54 dBm
+        # 31 -52 dBm or greater
+        # 99 not known or not detectable
+        
+        # <ber> (in percent):
+        # 0...7 As RXQUAL values in the table in GSM 05.08 [20] subclause 7.2.4
+        # 99 Not known or not detectable
+
+        if rssi == 0:
+            db = -115
+        elif rssi == 1:
+            db = -111
+        elif 2 <= rssi <= 30:
+            db = -110 + (rssi - 2)
+        elif rssi == 31:
+            db = -52
+        elif rssi == 99:
+            #db = "not known or not detectable"
+            db = None
+        else:
+            db = None
+
+        logger.debug("Signal Strength is: " + str(db) + "dBm")
+
+        SocketClient.emit("signal strength", {
+            "sim": transport.info,
+            "data": {
+                "rssi": db,
+                "ber": ber
+            }
+        })
+
+    @staticmethod
+    def Ring(transport, data):
+
+        d = data.split(",")
+        logger.debug(d)
+        
+        #	+CLIP: "+48884167733",145,"",0,"",0
+        #145 - incomming call
+        # 0 - caller waiting...
+
+        phone = d[0][1:-1]
+
+        logger.debug("Incoming call: " + phone)
+
+        transport.writeOne("AT+CHUP",  lambda transport, data: SocketClient.emit("incoming call rejected", {
+            "sim": transport.info,
+            "data": {
+                "phone": phone,
+            }
+        }))
+
+
+        SocketClient.emit("incoming call", {
+            "sim": transport.info,
+            "data": {
+                "phone": phone,
+            }
+        })
+
+        

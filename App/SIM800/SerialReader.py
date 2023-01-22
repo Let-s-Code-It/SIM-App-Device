@@ -76,6 +76,10 @@ class SerialReader(Protocol):
             logger.debug("send_queued in write")
             self.send_queued()
 
+    def writeOne(self, data, callback=None):
+        if not any(item.value == data for item in self.queue):
+            self.write(data, callback)
+
     def reconfigure(self):
         """
         Reconfigure SIM800 with our default settings
@@ -298,6 +302,8 @@ class SerialReader(Protocol):
         New serial data received
         """
 
+        logger.debug("New serial data received...")
+
         logger.debug(data)
         if b'\xFF' in data:
             return
@@ -358,7 +364,7 @@ class SerialReader(Protocol):
 
             if action in self.callbacks:
                 for callback in self.callbacks[action]:
-                    callback(self, data)
+                    callback(self, data.strip())
             else:
                 logger.debug("No callback defined for action '" + action + "'")
 
@@ -378,4 +384,9 @@ class SerialReader(Protocol):
     def stop(self):
         logger.debug("stop function - todo...")
         #self.transport.terminate()
+
+    def loop(self):
+        time.sleep(10)
+        self.writeOne("AT+CSQ")
+        logger.debug("Reader loop :)")
         

@@ -36,12 +36,17 @@ def start_reader():
 			Reader = ReaderThread(serial_port, SerialReader)
 
 			Reader.start()
-			#Reader._connection_made.wait()
+			Reader._connection_made.wait()
 
 			logger.debug("Serial port READY.")
 
-			#serial_port.close()
+			while Reader.is_alive():
+				#logger.debug("ReaderThread (SIM): Is alive :)")
+				GetReader().protocol.loop()
+			
+			logger.debug("ReaderThread is DEAD :c")
 
+			#serial_port.close()
 			break
 
 		except SerialException:
