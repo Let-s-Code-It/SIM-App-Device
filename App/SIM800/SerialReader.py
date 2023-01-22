@@ -42,7 +42,8 @@ class SerialReader(Protocol):
             'my_phone_number': '',
             'port_name': SQL.Get('port_name'),
             'port_friendly_name': SQL.Get('port_friendly_name'),
-            'serial_number': ''
+            'serial_number': '',
+            'serial_port_responds': self.connection_confirmed
         }
 
         self.sms_queue_from_panel = []
@@ -182,8 +183,9 @@ class SerialReader(Protocol):
         
     def check_connection(self):
         self.write("AT", lambda transport, data: transport.confirm_connection()) 
-    def confirm_connection(self):
-        self.connection_confirmed = True
+    def confirm_connection(self, val=True):
+        self.connection_confirmed = val
+        self.info['serial_port_responds'] = val
 
     def configure_apn(self):
         #configure mms
