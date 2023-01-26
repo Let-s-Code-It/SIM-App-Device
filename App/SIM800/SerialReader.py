@@ -38,6 +38,8 @@ class SerialReader(Protocol):
 
         self.connection_confirmed = False
 
+        self.FirstLoop = True
+
         self.info = {
             'my_phone_number': '',
             'port_name': SQL.Get('port_name'),
@@ -388,9 +390,21 @@ class SerialReader(Protocol):
         #self.transport.terminate()
 
     def loop(self):
+        #necessarily at the beginning!!
         time.sleep(10)
+
+        if not self.connection_confirmed:
+            logger.debug("Connection with serial port not confirmed!!")
+            if self.FirstLoop:
+                self.FirstLoop = False
+                logger.debug("TODO: Send information about serial connection problem to engine")
+        
+        #check signal strength
         self.writeOne("AT+CSQ")
+
+        #socket keep alive
         self.keepAlive()
+        
         logger.debug("Reader loop :)")
 
     def keepAlive(self):
