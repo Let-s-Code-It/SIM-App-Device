@@ -147,6 +147,7 @@ def json_data():
         "device_adopted": Device.Adopted,
         "apn_configured": apn_configured_check(),
         "connection_confirmed": GetReader().protocol.connection_confirmed if GetReader() != None else False,
+        "sim_card_detected": GetReader().protocol.simCardDetected if GetReader() != None else False,
 
 
         "time_now" : datetime.today().strftime('%Y-%m-%d %H:%M:%S'),

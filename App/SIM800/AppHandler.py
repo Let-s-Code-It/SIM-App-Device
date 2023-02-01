@@ -39,6 +39,8 @@ class AppHandler:
 
         self.reader.bind_event("+CLIP", AppHandler.Ring)
 
+        self.reader.bind_event("+CPIN", AppHandler.cpin)
+
 
 
     @staticmethod
@@ -46,6 +48,14 @@ class AppHandler:
         logger.debug("Reader Ready.")
         transport.Ready = True
         SocketClient.Readers.append(transport)
+        
+        SocketClient.emit("sim ready", {
+            "sim": transport.info
+        })
+
+        """
+        Todo ;)
+        """
         SocketClient.SendReadersInfo()
 
 
@@ -147,9 +157,11 @@ class AppHandler:
         Handler for errors
         """
 
-        logger.debug("Blont: " + data + ", po wykonaniu: " + transport.last_command.value + " :)")
-
         logger.error('CMS/CME: ' + data + '(after ' + transport.last_command.value + ')')
+
+        if data == "SIM not inserted":
+            logger.debug("Sim card not detected...")
+            transport.noSimCard()
 
         #transport.last_command.callbackError(transport, data)
         AppHandler.update_message_status_if_exist(transport, False, data)
@@ -253,5 +265,21 @@ class AppHandler:
                 "phone": phone,
             }
         })
+    
+    @staticmethod
+    def cpin(transport, data):
+        logger.debug("CPIN Command:")
+
+        transport.InitSimInProgress = False
+
+        if data == "READY":
+            transport.ActionAfterSimCardReady()
+        elif data == "NOT READY":
+            logger.debug("the sim card has been removed")
+            transport.noSimCard()
+        else:
+            logger.log("unknown message: " + data)
+            transport.noSimCard()
+
 
         

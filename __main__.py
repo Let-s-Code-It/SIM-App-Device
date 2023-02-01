@@ -73,8 +73,9 @@ After clicking Ctrl + C the program shuts down
 import signal
 import os
 def signal_handler(sig, frame):
-    print('You pressed Ctrl+C!')
-    os._exit(0)
+	print('You pressed Ctrl+C!')
+	SocketClient.Disconnect()
+	os._exit(0)
 
 
 

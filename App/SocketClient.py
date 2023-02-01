@@ -29,9 +29,7 @@ def connect_error(data):
 @sio.event(namespace='/device')
 def disconnect():
     logger.debug("I'm disconnected!")
-    SocketClient.Logged = False
-
-    defineLogToSocketFunction(None)
+    SocketClient.Disconnect()
 
 
 
@@ -109,6 +107,7 @@ def start_socket():
             break
         except socketio.exceptions.ConnectionError:
             logger.error("Socket Connection Error!")
+            SocketClient.Disconnect()
         except Exception as e:
             logger.error("Socket Error: Other... ")
             logger.error(e)
@@ -155,7 +154,11 @@ class SocketClient:
 
     @staticmethod
     def Disconnect():
+        logger.debug("-----> sio.disconnect() method")
         sio.disconnect()
+
+        SocketClient.Logged = False
+        defineLogToSocketFunction(None)
 
     @staticmethod
     def Reload():

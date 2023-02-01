@@ -1,163 +1,178 @@
-			</div>
-		</div>
-	</body>
+</div>
+</div>
+</body>
 
-	<style>
-		footer {
-			position: fixed;
-			left: 0;
-			bottom: 0;
-			width: 100%;
-			background-color: rgb(0 0 0 / 59%);
-			color: white;
-			text-align: center;
-		}
-		footer > a {
-			color:white;
-		}
-	</style>
-
-	{% if endpoint != 'login' %}
-	<script>
-
-		const global_alert = document.getElementById("global-alert");
-
-
-		function reqListener () {
-
-			try {
-				if(this.status == 401) {
-					location.href = "/";
-					throw Error("Maybe Not logged");
-				}
-
-				const d = JSON.parse(this.responseText);
-			  	console.log(d);
-
-
-			  	/**
-			  	 * Global alert window
-			  	 */
-
-			  	global_alert.innerHTML = "" +
-			  	"Real time data: " + d.time_now + "<br>" +
-			  	"Socket status: " +
-			  	(d.socket_connected ? 
-			  		( d.socket_logged ? 
-			  			( d.device_adopted ? "<b style='color:lime'>Connected</b>" : "<b style='color:yellow'>Connected, pending adoption</b>" ) : 
-			  			"<b style='color:orange'>Login Fail...</b>") : 
-			  		"<b style='color:red'>Disconnected</b>") +
-			  	"<br>" + 
-			  	"Serial status:  " +
-
-			  	(d.serial_connected ? 
-				  	!d.connection_confirmed ? "<b style='color:red'>The selected port did not respond</b>":
-					(d.apn_configured ? "<b style='color:lime'>Connected</b>" :  "<b style='color:orange'>Configure APN!</b>"): 
-					"<b style='color:red'>Disconnected</b>   (attempt every 10s)") + 
-			  	""
-
-
-
-			  	/**
-			  	 * Page:
-			  	 * /sms_list
-			  	 * */
-				if(d.sms_list) {
-					const el_sms_list = document.getElementById("sms-list");
-					if(document.body.contains(el_sms_list)) {
-						console.log('update sms list....')
-
-						/*var child = el_sms_list.lastElementChild; 
-				        while (child) {
-				            el_sms_list.removeChild(child);
-				            child = el_sms_list.lastElementChild;
-				     	}*/
-
-				     	el_sms_list.innerHTML = '';
-
-				     	for(var i in d.sms_list) {
-				     		const sms = d.sms_list[i];
-
-				     		var area = document.createElement("textarea");
-				     		area.value = sms[3] + "\n" + "From: " + sms[1] + "\n\n" + sms[2];
-				     		area.style.height = '150px';
-				     		area.disabled = true;
-				     		area.readony = true;
-
-				     		el_sms_list.appendChild(area);
-				     	}
-					} else console.log('no sms-list element on html')
-				} else console.log('sms_list no exist in array')
-
-
-			} catch(e) {
-				console.warn(e)
-				global_alert.innerHTML = "<b style='color:red'>Something went wrong</b>";
+<style>
+	footer {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: rgb(0 0 0 / 59%);
+	color: white;
+	text-align: center;
+	}
+	footer > a {
+	color:white;
+	}
+</style>
+{% if endpoint != 'login' %}
+<script>
+	const global_alert = document.getElementById("global-alert");
+	
+	
+	function reqListener () {
+	
+		try {
+			if(this.status == 401) {
+				location.href = "/";
+				throw Error("Maybe Not logged");
 			}
-
-		  
-		}
-
-		function loopRequest() {
-			try {
-				const req = new XMLHttpRequest();
-				req.addEventListener("load", reqListener);
-
-				req.onerror = function(e){
-				    global_alert.innerHTML = "<b style='color:red'>The application is not responding</b>";
-				};
-
-				req.open("GET", "/json_data");
-				req.send();
-			} catch(e) {
-				console.log('loopRequest catch:', e)
-				
-			} finally {
-				setTimeout(loopRequest, 999)
-			}
-		}
-
-		loopRequest()
-
-
-		function checkForUpdate() {
-			try {
-				const req = new XMLHttpRequest();
-				req.addEventListener("load", function(){
-					const ob = JSON.parse(this.responseText)
-					console.log('package data', ob)
-					if("info" in ob && "version" in ob.info && ob.info.version != '{{version.tag}}' && '{{version.tag}}' != '0.0.0') {
-						const new_version = ob.info.version;
-						const new_version_el = document.getElementById("new-update-version");
-						new_version_el.innerHTML = new_version;
-
-						const new_version_alert = document.getElementById("update-available-alert");
-						new_version_alert.style.display = 'block';
-
+	
+			const d = JSON.parse(this.responseText);
+		  	console.log(d);
+	
+	
+		  	/**
+		  	 * Global alert window
+		  	 */
+	
+			   ((d) => {
+					let message = "Real time data: " + d.time_now + "<br>";
+					message += "Socket status: ";
+	
+					if (d.socket_connected) {
+						if (d.socket_logged) {
+							if (d.device_adopted) {
+								message += "<b style='color:lime'>Connected</b>";
+							} else {
+								message += "<b style='color:yellow'>Connected, pending adoption</b>";
+							}
+						} else {
+							message += "<b style='color:orange'>Login Fail...</b>";
+						}
+					} else {
+						message += "<b style='color:red'>Disconnected</b>";
 					}
-				});
-
-				req.onerror = function(e){
-				    
-				};
-
-				req.open("GET", "https://pypi.org/pypi/{{pypi_package_name}}/json");
-				req.send();
-			} catch(e) {
-				console.log('checkForUpdate catch:', e)
-				
-			} finally {
-				setTimeout(checkForUpdate, 60 * 1000 * 10)
-			}
+	
+					message += "<br>Serial status: ";
+	
+					if (d.serial_connected) {
+						if (!d.sim_card_detected) {
+							message += "<b style='color:red'>SIM Card not detected</b>";
+						} else if (!d.connection_confirmed) {
+							message += "<b style='color:red'>The selected port did not respond</b>";
+						} else if (d.apn_configured) {
+							message += "<b style='color:lime'>Connected</b>";
+						} else {
+							message += "<b style='color:orange'>Configure APN!</b>";
+						}
+					} else {
+						message += "<b style='color:red'>Disconnected</b>   (attempt every 10s)";
+					}
+					global_alert.innerHTML = message;
+				})(d)
+	
+	
+	
+		  	/**
+		  	 * Page:
+		  	 * /sms_list
+		  	 * */
+			if(d.sms_list) {
+				const el_sms_list = document.getElementById("sms-list");
+				if(document.body.contains(el_sms_list)) {
+					console.log('update sms list....')
+	
+					/*var child = el_sms_list.lastElementChild; 
+			        while (child) {
+			            el_sms_list.removeChild(child);
+			            child = el_sms_list.lastElementChild;
+			     	}*/
+	
+			     	el_sms_list.innerHTML = '';
+	
+			     	for(var i in d.sms_list) {
+			     		const sms = d.sms_list[i];
+	
+			     		var area = document.createElement("textarea");
+			     		area.value = sms[3] + "\n" + "From: " + sms[1] + "\n\n" + sms[2];
+			     		area.style.height = '150px';
+			     		area.disabled = true;
+			     		area.readony = true;
+	
+			     		el_sms_list.appendChild(area);
+			     	}
+				} else console.log('no sms-list element on html')
+			} else console.log('sms_list no exist in array')
+	
+	
+		} catch(e) {
+			console.warn(e)
+			global_alert.innerHTML = "<b style='color:red'>Something went wrong</b>";
 		}
-
-		checkForUpdate()
-
-	</script>
-	{% endif %}
-
-	<footer>
-		Created by <a target=_blank href="{{author_page}}">Karol Sójka</a>, from Poland.
-	</footer>
-
+	
+	  
+	}
+	
+	function loopRequest() {
+		try {
+			const req = new XMLHttpRequest();
+			req.addEventListener("load", reqListener);
+	
+			req.onerror = function(e){
+			    global_alert.innerHTML = "<b style='color:red'>The application is not responding</b>";
+			};
+	
+			req.open("GET", "/json_data");
+			req.send();
+		} catch(e) {
+			console.log('loopRequest catch:', e)
+			
+		} finally {
+			setTimeout(loopRequest, 999)
+		}
+	}
+	
+	loopRequest()
+	
+	
+	function checkForUpdate() {
+		try {
+			const req = new XMLHttpRequest();
+			req.addEventListener("load", function(){
+				const ob = JSON.parse(this.responseText)
+				console.log('package data', ob)
+				if("info" in ob && "version" in ob.info && ob.info.version != '{{version.tag}}' && '{{version.tag}}' != '0.0.0') {
+					const new_version = ob.info.version;
+					const new_version_el = document.getElementById("new-update-version");
+					new_version_el.innerHTML = new_version;
+	
+					const new_version_alert = document.getElementById("update-available-alert");
+					new_version_alert.style.display = 'block';
+	
+				}
+			});
+	
+			req.onerror = function(e){
+			    
+			};
+	
+			req.open("GET", "https://pypi.org/pypi/{{pypi_package_name}}/json");
+			req.send();
+		} catch(e) {
+			console.log('checkForUpdate catch:', e)
+			
+		} finally {
+			setTimeout(checkForUpdate, 60 * 1000 * 10)
+		}
+	}
+	
+	checkForUpdate()
+	
+</script>
+{% endif %}
+<footer>
+	Created by <a target=_blank href="{{author_page}}">Karol Sójka</a>, from Poland.
+</footer>
 </html>

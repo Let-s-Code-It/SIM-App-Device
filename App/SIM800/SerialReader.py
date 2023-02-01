@@ -27,25 +27,51 @@ class SerialReader(Protocol):
         """
         Initialize default data and event handlers
         """
+        self.transport = None
+
+        self.InitSimInProgress = False
+
+        self.init()
+
+    def init(self, restored=False):
+
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
+        print('-')
 
         self.queue = []
         self.callbacks = {}
         self.handler = AppHandler(self)
         self.last_command = None
         self.next_response_callback = None
-        self.transport = None
+        
         self.buffer = None
 
-        self.connection_confirmed = False
+        self.connection_confirmed = restored
 
         self.FirstLoop = True
+
+        self.simCardDetected = True
 
         self.info = {
             'my_phone_number': '',
             'port_name': SQL.Get('port_name'),
             'port_friendly_name': SQL.Get('port_friendly_name'),
             'serial_number': '',
-            'serial_port_responds': self.connection_confirmed
+            'serial_port_responds': self.connection_confirmed,
+            'sim_card_detected': self.simCardDetected
         }
 
         self.sms_queue_from_panel = []
@@ -83,6 +109,14 @@ class SerialReader(Protocol):
         if not any(item.value == data for item in self.queue):
             self.write(data, callback)
 
+    def writeAbsolutely(self, data, callback=None):
+        
+        logger.debug("Absolute sending of the command: " + data)
+        
+        self.next_response_callback = callback
+        self.last_command = data
+        self.transport.write(str.encode(data) + b'\n')
+
     def reconfigure(self):
         """
         Reconfigure SIM800 with our default settings
@@ -108,86 +142,24 @@ class SerialReader(Protocol):
             "hide send at command on response"))
         self.write("AT", lambda transport, data: logger.debug("AT callback :)"))
         self.write("ATZ", lambda transport, data: logger.debug("Factory reset"))
+
         self.write("AT+CFUN=1,1", lambda transport, data: time.sleep(5))
 
         self.write("ATE0", lambda transport, data: logger.debug(
             "hide send at command on response"))
 
         self.write("AT+CMEE=2", lambda transport, data: logger.debug("Show errors"))
-        self.write("AT+CPIN?", lambda transport, data: logger.debug("PIN/SIM status"))
 
-        # Before (mode=1, text):
-        #   self.queue.append(QueuedCommand('AT+CMGDA="DEL ALL"', lambda
-        #       transport, data: print("Dell All SMS fro memory"))
-        # Below is the same, but with mode=0 (numbers)
-        self.write(
-            'AT+CMGDA=6',
-            lambda transport,
-            data: logger.debug("Dell All SMS fro memory"))
+        #self.write("AT+CPIN?", lambda transport, data: self.simCardInserted(data))
+        self.write("AT+CPIN?")
 
-        self.write("AT+GSN", AppHandler.save_serial_number)
-        
-        #self.write("AT+CNUM", lambda transport, data: print("SIM phone number"))
-        self.write("AT+CNUM")
-        
-        self.write(
-            "ATH",
-            lambda transport,
-            data: logger.debug("End call ( if exist ;) )"))
-        self.write("ATS0=0", lambda transport, data: logger.debug(
-            "Automatic connection reception - FALSE"))
-        self.write(
-            "AT+DDET=1,100,0,0",
-            lambda transport,
-            data: logger.debug("Tone Dialling"))
-        self.write("AT+CRSL=0", lambda transport, data: logger.debug("Call volume 0"))
-        self.write("AT+CLIP=1", lambda transport, data: logger.debug("Caller info"))
-        self.write(
-            'AT+CSCS="UCS2"',
-            lambda transport,
-            data: logger.debug("encoding the message to UCS2"))
-        self.write("AT+CMGF=1", lambda transport, data: logger.debug(""))
-        self.write(
-            "AT+CSAS=0",
-            lambda transport,
-            data: logger.debug("for CSMP work..."))
-        self.write(
-            "AT+CSMP=17,167,2,25",
-            lambda transport,
-            data: logger.debug("utf8 etc...."))
-        self.write(
-            "AT+CUSD=1",
-            lambda transport,
-            data: logger.debug("card operator message"))
-
-        # Configure GPS
-        
-        """
-        self.write("AT+CGNSPWR=1", lambda transport, data: print(""))
-        self.write("AT+CGATT=1", lambda transport, data: print(""))
-        self.write(
-            'AT+SAPBR=3,1,"CONTYPE","GPRS"',
-            lambda transport,
-            data: print(""))
-        self.write('AT+CGNSSEQ="RMC"', lambda transport, data: print(""))
-        self.write("AT+CGPSRST=0", lambda transport, data: print(""))
-        """
-
-        self.configure_apn()
-
-        self.write("ATD*101#;", lambda transport, data: logger.debug("Reading USSD..."))
-
-
-
-
-        """ Dont remove this command - its verifications :)"""
-        self.write("AT", AppHandler.Ready )
         
     def check_connection(self):
         self.write("AT", lambda transport, data: transport.confirm_connection()) 
     def confirm_connection(self, val=True):
         self.connection_confirmed = val
         self.info['serial_port_responds'] = val
+        logger.debug("Connection confirmed (t/f)")
 
     def configure_apn(self):
         #configure mms
@@ -354,17 +326,20 @@ class SerialReader(Protocol):
             line = '\n'.join(lines[i:j])
             i = j
 
-            logger.debug(line)
+            print(line)
 
             parts = line.split(':', 1)
             data = ""
             action = ""
 
+            print(parts)
+
             if len(parts) > 1:
                 action = parts[0]
                 data = parts[1]
             else:
-                data = parts[0]
+                #data = parts[0]
+                action = parts[0]
 
             if action in self.callbacks:
                 for callback in self.callbacks[action]:
@@ -395,12 +370,21 @@ class SerialReader(Protocol):
 
         if not self.connection_confirmed:
             logger.debug("Connection with serial port not confirmed!!")
+            self.writeAbsolutely("AT", lambda transport, data: self.init(restored=True))
             if self.FirstLoop:
                 self.FirstLoop = False
                 logger.debug("TODO: Send information about serial connection problem to engine")
-        
-        #check signal strength
-        self.writeOne("AT+CSQ")
+        elif not self.simCardDetected:
+            if not self.InitSimInProgress:
+                self.InitSimInProgress = True
+                logger.debug("Check sim card status again....")
+                self.writeOne("AT+CFUN=1,1", lambda transport, data: self.InitSim(data))
+                #self.writeOne("AT+CPIN?", lambda transport, data: print("TEST -> CPIN", data))
+            else:
+                logger.debug("Check sim card - loop blocked, becouse init sim card in progress :)")
+        else:
+            #check signal strength
+            self.writeOne("AT+CSQ")
 
         #socket keep alive
         self.keepAlive()
@@ -422,4 +406,143 @@ class SerialReader(Protocol):
             SocketClient.Disconnect()
             SocketClient.Connect()
             logger.info("Socket restart - keep alive limit...")
+
+    def noSimCard(self):
+        logger.debug("noSimCard method...")
+        self.simCardDetected = False
+        self.info['sim_card_detected'] = False
+        self.InitSimInProgress = False
+    def simCardInserted(self, data):
+        logger.debug("PIN/SIM status: " + ('|'.join(data)))
+        logger.debug("Sim detected succesfully :)")
+        self.simCardDetected = True
+        self.info['sim_card_detected'] = True
+
+    def InitSim(self, data):
+        time.sleep(10)
         
+        #self.write("AT+CMEE=2", lambda transport, data: logger.debug("Show errors"))
+
+        #self.write("ATE0", lambda transport, data: logger.debug("hide send at command on response"))
+        #self.writeAbsolutely("AT", lambda transport, data: logger.debug("AT response in InitSim fnc..."))
+        #self.write("AT", lambda transport, data: logger.debug("AT response [2] in InitSim fnc..."))
+
+
+        self.write("ATE0", lambda transport, data: logger.debug(
+            "hide send at command on response"))
+
+        self.write("AT+CMEE=2", lambda transport, data: logger.debug("Show errors"))
+
+        #self.write("AT+CPIN?", lambda transport, data: self.simCardInserted(data))
+        #self.write("AT", lambda transport, data: self.InitSimStatus(False))
+
+        self.write("AT+CPIN?")
+
+    def InitSimStatus(self, status):
+        print("InitSimStatus:", status)
+        self.InitSimInProgress = status
+
+    def ActionAfterSimCardReady(self):
+        logger.debug("SIM CARD READY :)")
+
+        self.simCardDetected = True
+
+        #self.write('AT+CLCK="SC",1,"1234",1')
+
+        # Before (mode=1, text):
+        #   self.queue.append(QueuedCommand('AT+CMGDA="DEL ALL"', lambda
+        #       transport, data: print("Dell All SMS fro memory"))
+        # Below is the same, but with mode=0 (numbers)
+        self.write(
+            'AT+CMGDA=6',
+            lambda transport,
+            data: logger.debug("Dell All SMS fro memory"))
+
+        """
+        Save Device serial number
+        """
+        self.write("AT+GSN", AppHandler.save_serial_number)
+
+
+        """
+        End call if exist
+        """
+        self.write(
+            "ATH",
+            lambda transport,
+            data: logger.debug("End call ( if exist ;) )"))
+
+
+        """
+        Disable Automatic connection reception
+        """
+        self.write("ATS0=0", lambda transport, data: logger.debug(
+            "Automatic connection reception - FALSE"))
+
+
+        """
+        Define Tone Dialing
+        """
+        self.write(
+            "AT+DDET=1,100,0,0",
+            lambda transport,
+            data: logger.debug("Tone Dialling"))
+        
+
+        """
+        Incomming call ringtone volume -> 0
+        """
+        self.write("AT+CRSL=0", lambda transport, data: logger.debug("Call volume 0"))
+
+        
+        """
+        show data about caller  - phone number etc
+        """
+        self.write("AT+CLIP=1", lambda transport, data: logger.debug("Caller info"))
+
+
+        """
+        specific SMS text format
+        """
+        self.write(
+            'AT+CSCS="UCS2"',
+            lambda transport,
+            data: logger.debug("encoding the message to UCS2"))
+
+        #self.write("AT+CNUM", lambda transport, data: print("SIM phone number"))
+        self.write("AT+CNUM")
+
+        
+        self.write("AT+CMGF=1", lambda transport, data: logger.debug(""))
+        self.write(
+            "AT+CSAS=0",
+            lambda transport,
+            data: logger.debug("for CSMP work..."))
+        self.write(
+            "AT+CSMP=17,167,2,25",
+            lambda transport,
+            data: logger.debug("utf8 etc...."))
+        self.write(
+            "AT+CUSD=1",
+            lambda transport,
+            data: logger.debug("card operator message"))
+
+        # Configure GPS
+        
+        """
+        self.write("AT+CGNSPWR=1", lambda transport, data: print(""))
+        self.write("AT+CGATT=1", lambda transport, data: print(""))
+        self.write(
+            'AT+SAPBR=3,1,"CONTYPE","GPRS"',
+            lambda transport,
+            data: print(""))
+        self.write('AT+CGNSSEQ="RMC"', lambda transport, data: print(""))
+        self.write("AT+CGPSRST=0", lambda transport, data: print(""))
+        """
+
+        self.configure_apn()
+
+        #self.write("ATD*101#;", lambda transport, data: logger.debug("Reading USSD..."))
+
+        """ Dont remove this command - its verifications :)"""
+        self.write("AT", AppHandler.Ready )
