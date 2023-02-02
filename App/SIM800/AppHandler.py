@@ -40,6 +40,8 @@ class AppHandler:
         self.reader.bind_event("+CLIP", AppHandler.Ring)
 
         self.reader.bind_event("+CPIN", AppHandler.cpin)
+        
+        self.reader.bind_event("+SPIC", AppHandler.RemainingPinOrPukAttempts)
 
 
 
@@ -49,9 +51,7 @@ class AppHandler:
         transport.Ready = True
         SocketClient.Readers.append(transport)
         
-        SocketClient.emit("sim ready", {
-            "sim": transport.info
-        })
+        transport.emit("sim ready")
 
         """
         Todo ;)
@@ -72,8 +72,7 @@ class AppHandler:
             message = UTF16.decode(msg)
             logger.debug(message)
 
-            SocketClient.emit("ussd received", {
-                "sim": transport.info,
+            transport.emit("ussd received", {
                 "data": {
                     "message": message
                 }
@@ -140,8 +139,7 @@ class AppHandler:
         SQL.add_sms(number, msg, date, t)
 
 
-        SocketClient.emit("sms received", {
-            "sim": transport.info,
+        transport.emit("sms received", {
             "data": {
                 "from": number,
                 "date": date,
@@ -162,6 +160,9 @@ class AppHandler:
         if data == "SIM not inserted":
             logger.debug("Sim card not detected...")
             transport.noSimCard()
+        elif data == "incorrect password":
+            logger.error("Invalid pin code!")
+            transport.PinCodeNeeded()
 
         #transport.last_command.callbackError(transport, data)
         AppHandler.update_message_status_if_exist(transport, False, data)
@@ -172,12 +173,12 @@ class AppHandler:
         l = data.split('"')
         logger.debug("Save my phone number...")
         logger.debug(l)
-        transport.info['my_phone_number'] = l[3]
+        transport.my_phone_number = l[3]
 
     @staticmethod
     def save_serial_number(transport, data):
         logger.debug(["Serial number", data])
-        transport.info['serial_number'] = data[0]
+        transport.serial_number = data[0]
 
     @staticmethod
     def message_sent(transport, data):
@@ -229,8 +230,7 @@ class AppHandler:
 
         logger.debug("Signal Strength is: " + str(db) + "dBm")
 
-        SocketClient.emit("signal strength", {
-            "sim": transport.info,
+        transport.emit("signal strength", {
             "data": {
                 "rssi": db,
                 "ber": ber
@@ -251,16 +251,14 @@ class AppHandler:
 
         logger.debug("Incoming call: " + phone)
 
-        transport.writeOne("AT+CHUP",  lambda transport, data: SocketClient.emit("incoming call rejected", {
-            "sim": transport.info,
+        transport.writeOne("AT+CHUP",  lambda transport, data: transport.emit("incoming call rejected", {
             "data": {
                 "phone": phone,
             }
         }))
 
 
-        SocketClient.emit("incoming call", {
-            "sim": transport.info,
+        transport.emit("incoming call", {
             "data": {
                 "phone": phone,
             }
@@ -277,9 +275,25 @@ class AppHandler:
         elif data == "NOT READY":
             logger.debug("the sim card has been removed")
             transport.noSimCard()
+        elif data == "SIM PIN":
+            logger.info("PIN Code Required!")
+            transport.PinCodeNeeded()
+        elif data == "SIM PUK":
+            raise Exception("The sim card requires a PUK code. Remove the card, put it in the phone and enter the puk code and preferably remove the pin code.")
         else:
-            logger.log("unknown message: " + data)
-            transport.noSimCard()
+            logger.debug("unknown sim CPIN message: " + data)
+            raise Exception("The sim card returned an unknown error, prompting us to stop the application. This error is: '" + data + "'. If you can, contact your administrator and describe the problem. I will be happy to correct it.")
+
+    @staticmethod
+    def RemainingPinOrPukAttempts(transport, data):
+        logger.debug("RemainingPinOrPukAttempts:")
+        d = data.split(",")
+        logger.debug(d)
+
+        [pin1, pin2, puk1, puk2] = d
+        transport.SaveRemainingPinOrPukAttempts(pin1, pin2, puk1, puk2)
+
+
 
 
         

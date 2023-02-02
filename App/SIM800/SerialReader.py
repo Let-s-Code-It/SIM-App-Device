@@ -51,6 +51,8 @@ class SerialReader(Protocol):
         print('-')
         print('-')
 
+        self.Ready = False
+
         self.queue = []
         self.callbacks = {}
         self.handler = AppHandler(self)
@@ -65,18 +67,31 @@ class SerialReader(Protocol):
 
         self.simCardDetected = True
 
-        self.info = {
-            'my_phone_number': '',
-            'port_name': SQL.Get('port_name'),
-            'port_friendly_name': SQL.Get('port_friendly_name'),
-            'serial_number': '',
-            'serial_port_responds': self.connection_confirmed,
-            'sim_card_detected': self.simCardDetected
-        }
+        self.PinCodeRequired = False
+
+        self.availablePinAttempts = None
 
         self.sms_queue_from_panel = []
 
+        self.serial_number = ''
+        self.my_phone_number = ''
+
         self.reconfigure()
+
+    def GetInfo(self):
+        return {
+            'my_phone_number': self.my_phone_number,
+            'port_name': SQL.Get('port_name'),
+            'port_friendly_name': SQL.Get('port_friendly_name'),
+            'serial_number': self.serial_number,
+            'serial_port_responds': self.connection_confirmed,
+            'sim_card_detected': self.simCardDetected,
+            'pin_code_required': self.PinCodeRequired
+        }
+
+    def emit(self, title, message={}):
+        message['sim'] = self.GetInfo()
+        return SocketClient.emit(title, message)
 
     def bind_event(self, event, callback):
         """
@@ -158,7 +173,6 @@ class SerialReader(Protocol):
         self.write("AT", lambda transport, data: transport.confirm_connection()) 
     def confirm_connection(self, val=True):
         self.connection_confirmed = val
-        self.info['serial_port_responds'] = val
         logger.debug("Connection confirmed (t/f)")
 
     def configure_apn(self):
@@ -382,7 +396,7 @@ class SerialReader(Protocol):
                 #self.writeOne("AT+CPIN?", lambda transport, data: print("TEST -> CPIN", data))
             else:
                 logger.debug("Check sim card - loop blocked, becouse init sim card in progress :)")
-        else:
+        elif self.Ready:
             #check signal strength
             self.writeOne("AT+CSQ")
 
@@ -398,9 +412,7 @@ class SerialReader(Protocol):
             if SocketClient.keepAliveLastSentTime == 0:
                 SocketClient.keepAliveLastSentTime = time.time()
             logger.debug("Keep alive time: " + str(time.time() - SocketClient.keepAliveLastSentTime))
-            SocketClient.emit("keep alive", {
-                "sim": self.info
-            })
+            self.emit("keep alive")
         else:
             SocketClient.keepAliveLastSentTime = 0
             SocketClient.Disconnect()
@@ -410,13 +422,11 @@ class SerialReader(Protocol):
     def noSimCard(self):
         logger.debug("noSimCard method...")
         self.simCardDetected = False
-        self.info['sim_card_detected'] = False
         self.InitSimInProgress = False
     def simCardInserted(self, data):
         logger.debug("PIN/SIM status: " + ('|'.join(data)))
         logger.debug("Sim detected succesfully :)")
         self.simCardDetected = True
-        self.info['sim_card_detected'] = True
 
     def InitSim(self, data):
         time.sleep(10)
@@ -446,6 +456,7 @@ class SerialReader(Protocol):
         logger.debug("SIM CARD READY :)")
 
         self.simCardDetected = True
+        self.PinCodeRequired = False
 
         #self.write('AT+CLCK="SC",1,"1234",1')
 
@@ -546,3 +557,40 @@ class SerialReader(Protocol):
 
         """ Dont remove this command - its verifications :)"""
         self.write("AT", AppHandler.Ready )
+
+    def PinCodeNeeded(self):
+        self.simCardDetected = True
+        #self.PinCodeRequired = True
+
+        self.write('AT+SPIC')
+
+    def SaveRemainingPinOrPukAttempts(self, pin1, pin2, puk1, puk2):
+        logger.debug("availablePinAttempts:" + pin1)
+        self.availablePinAttempts = pin1
+
+        if pin1 == '3':
+            logger.debug("you have the maximum number of attempts to enter the pin code")
+            saved_pin = SQL.Get('pin_code')
+            if len(saved_pin) > 1:
+                logger.debug("Trying to use pin code: " + saved_pin)
+                return self.UsePinCode(saved_pin)
+            else:
+                logger.error("you have not saved your pin code")
+        else:
+            logger.error("You do not have the maximum number of pin code attempts available")
+
+        self.PinCodeRequired = True
+
+        self.emit("pin code required")
+
+    def SavePinCode(self, pin):
+        SQL.Set("pin_code", pin )
+        logger.debug("Save pin code: " + pin)
+
+        if self.availablePinAttempts != None and self.PinCodeRequired:
+            logger.debug("i'm trying to unlock with the pin you just typed in the form")
+            self.UsePinCode(pin)
+
+    def UsePinCode(self, pin):
+        logger.debug("UsePinCode -> " + pin)
+        self.write('AT+CPIN="' + pin + '"')

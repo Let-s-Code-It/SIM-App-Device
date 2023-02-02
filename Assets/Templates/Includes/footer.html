@@ -58,10 +58,14 @@
 					message += "<br>Serial status: ";
 	
 					if (d.serial_connected) {
-						if (!d.sim_card_detected) {
+						if(d.pin_code_required) {
+							message += "<b style='color:orange'>PIN Code Required " + (parseInt(d.availablePinAttempts) == d.availablePinAttempts ?  "(chances: " + d.availablePinAttempts + ")" : "") + "</b>";
+						} else if (!d.sim_card_detected) {
 							message += "<b style='color:red'>SIM Card not detected</b>";
 						} else if (!d.connection_confirmed) {
 							message += "<b style='color:red'>The selected port did not respond</b>";
+						} else if (!d.serial_ready) {
+							message += "<b style='color:yellow'>Wait a moment</b>";
 						} else if (d.apn_configured) {
 							message += "<b style='color:lime'>Connected</b>";
 						} else {
@@ -106,6 +110,9 @@
 				} else console.log('no sms-list element on html')
 			} else console.log('sms_list no exist in array')
 	
+			
+			/** show pin code button */
+			document.getElementById('pin_url').style.display = d.pin_code_required ? 'block' : 'none';
 	
 		} catch(e) {
 			console.warn(e)

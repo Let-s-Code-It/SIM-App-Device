@@ -1,0 +1,31 @@
+{% include 'Includes/head.html' %}
+    
+    <form class="form" method="post" enctype="multipart/form-data" autocomplete="off">
+      
+        <div>
+            <br><h3>PIN Code</h3><br>
+            
+            {% if not ready %}<div class="alert alert-error">Serial port not ready</div>{% endif %}
+
+            <label for="pin_code">Enter pin code if required</label>
+            <input 
+            type="text" 
+            placeholder="0000" 
+            name="pin_code" 
+            id="pin_code"
+            pattern="[0-9]{4,8}"
+            value=""
+            />
+
+            <!-- <div>
+            <input id="remove_pin" name="remove_pin" type="checkbox">
+            <label for="remove_pin">Delete pin code</label>
+            </div> -->
+
+        </div>
+
+        <br>
+        
+      <input type="submit" value="Enter" name="enter" class="btn btn-block btn-primary" />
+    </form>
+{% include 'Includes/footer.html' %}

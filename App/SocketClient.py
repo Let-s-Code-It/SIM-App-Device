@@ -30,6 +30,7 @@ def connect_error(data):
 def disconnect():
     logger.debug("I'm disconnected!")
     SocketClient.Disconnect()
+    SocketClient.Connect()
 
 
 
@@ -99,20 +100,31 @@ def on_message(data):
 
 AtLeastOnceConnected = False
 
+start_socket_function_bool = False
 def start_socket():
-    while(True):
-        try:
-            sio.connect( SQL.Get("socket_address"), namespaces=['/device'] )
-            AtLeastOnceConnected = True
-            break
-        except socketio.exceptions.ConnectionError:
-            logger.error("Socket Connection Error!")
-            SocketClient.Disconnect()
-        except Exception as e:
-            logger.error("Socket Error: Other... ")
-            logger.error(e)
-        finally:
-            time.sleep(10)
+    global start_socket_function_bool
+    time.sleep(3)
+    if not sio.connected:
+        if not start_socket_function_bool:
+            start_socket_function_bool = True
+            while(True):
+                try:
+                    sio.connect( SQL.Get("socket_address"), namespaces=['/device'] )
+                    AtLeastOnceConnected = True
+                    break
+                except socketio.exceptions.ConnectionError:
+                    logger.error("Socket Connection Error!")
+                    SocketClient.Disconnect()
+                except Exception as e:
+                    logger.error("Socket Error: Other... ")
+                    logger.error(e)
+                finally:
+                    time.sleep(10)
+            start_socket_function_bool = False
+        else:
+            logger.debug("double start_socket function blocked")
+    else:
+        logger.debug("start_socket function blocked - socket is connected")
 
 
 
@@ -188,15 +200,15 @@ class SocketClient:
 
         try:
             return sio.emit(title, message, namespace='/device')
-        except socketio.exceptions.BadNamespaceError:
-            logger.debug(["I cant send this message to socket :c Is disconnected", title, message])
+        except socketio.exceptions.BadNamespaceError as err:
+            logger.debug(["I cant send this message to socket :c Is disconnected", title, message, err])
 
 
     @staticmethod
     def SendReadersInfo():
         if(len(SocketClient.Readers) > 0):
-            logger.debug(["sim cards", [SocketClient.Readers[0].info]])
-            SocketClient.emit("update sim cards", [SocketClient.Readers[0].info])
+            logger.debug(["sim cards", [SocketClient.Readers[0].GetInfo()]])
+            SocketClient.emit("update sim cards", [SocketClient.Readers[0].GetInfo()])
         else:
             logger.debug("SendReadersInfo: No one Readers ready...")
 

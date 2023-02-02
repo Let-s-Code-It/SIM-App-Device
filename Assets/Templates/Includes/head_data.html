@@ -22,6 +22,14 @@
 <br>
 
 {% if endpoint != 'index' %}
-<a  class="a-btn" href="/"><button class="btn btn-block btn-primary">Home Page</button></a>
+<a class="a-btn" href="/"><button class="btn btn-block btn-primary">Home Page</button></a>
 <br>
+{% endif %}
+
+
+
+{% if endpoint != 'pin' %}
+<a id="pin_url" style="display:none"  href="/pin" class="a-btn"><button class="btn btn-block btn-primary" style="color:orange"><b>Pin Code</b></button></a>
+{% else %}
+<br id="pin_url">
 {% endif %}

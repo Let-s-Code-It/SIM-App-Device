@@ -148,6 +148,9 @@ def json_data():
         "apn_configured": apn_configured_check(),
         "connection_confirmed": GetReader().protocol.connection_confirmed if GetReader() != None else False,
         "sim_card_detected": GetReader().protocol.simCardDetected if GetReader() != None else False,
+        "pin_code_required": GetReader().protocol.PinCodeRequired if GetReader() != None else False,
+        "serial_ready": GetReader().protocol.Ready if GetReader() != None else False,
+        "availablePinAttempts": GetReader().protocol.availablePinAttempts if GetReader() != None else False,
 
 
         "time_now" : datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
@@ -240,6 +243,16 @@ def WebStart():
         app.run(debug=False, host='0.0.0.0', port=LaunchArguments.webport)
     except:
         logger.debug("WebServer start problem!")
+
+@app.route('/pin', methods = ['GET','POST'])
+def pin():
+    ready = GetReader() != None
+    if ready and request.method == 'POST':
+        if request.form['pin_code']:
+            GetReader().protocol.SavePinCode(request.form['pin_code'])
+            return redirect(url_for('index'))
+
+    return render_template('pin.html', ready=ready)
 
 
 WebThread = Thread(target=WebStart)
