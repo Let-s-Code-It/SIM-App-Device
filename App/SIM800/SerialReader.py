@@ -31,6 +31,8 @@ class SerialReader(Protocol):
 
         self.InitSimInProgress = False
 
+        SocketClient.Readers.append(self)
+
         self.init()
 
     def init(self, restored=False):
@@ -76,6 +78,9 @@ class SerialReader(Protocol):
         self.serial_number = ''
         self.my_phone_number = ''
 
+        if restored:
+            self.emit("serial connection confirmed")
+
         self.reconfigure()
 
     def GetInfo(self):
@@ -86,7 +91,8 @@ class SerialReader(Protocol):
             'serial_number': self.serial_number,
             'serial_port_responds': self.connection_confirmed,
             'sim_card_detected': self.simCardDetected,
-            'pin_code_required': self.PinCodeRequired
+            'pin_code_required': self.PinCodeRequired,
+            'serial_port_ready': self.Ready
         }
 
     def emit(self, title, message={}):
@@ -149,7 +155,6 @@ class SerialReader(Protocol):
         # return
 
 
-
         self.check_connection()
 
 
@@ -171,9 +176,10 @@ class SerialReader(Protocol):
         
     def check_connection(self):
         self.write("AT", lambda transport, data: transport.confirm_connection()) 
-    def confirm_connection(self, val=True):
-        self.connection_confirmed = val
-        logger.debug("Connection confirmed (t/f)")
+    def confirm_connection(self):
+        self.connection_confirmed = True
+        self.emit("serial connection confirmed")
+        logger.debug("Connection confirmed")
 
     def configure_apn(self):
         #configure mms
@@ -387,7 +393,8 @@ class SerialReader(Protocol):
             self.writeAbsolutely("AT", lambda transport, data: self.init(restored=True))
             if self.FirstLoop:
                 self.FirstLoop = False
-                logger.debug("TODO: Send information about serial connection problem to engine")
+                self.simCardDetected = False
+                self.emit("serial connection not confirmed")
         elif not self.simCardDetected:
             if not self.InitSimInProgress:
                 self.InitSimInProgress = True
@@ -423,40 +430,25 @@ class SerialReader(Protocol):
         logger.debug("noSimCard method...")
         self.simCardDetected = False
         self.InitSimInProgress = False
-    def simCardInserted(self, data):
-        logger.debug("PIN/SIM status: " + ('|'.join(data)))
-        logger.debug("Sim detected succesfully :)")
-        self.simCardDetected = True
+        self.emit("sim card not detected")
 
     def InitSim(self, data):
         time.sleep(10)
-        
-        #self.write("AT+CMEE=2", lambda transport, data: logger.debug("Show errors"))
-
-        #self.write("ATE0", lambda transport, data: logger.debug("hide send at command on response"))
-        #self.writeAbsolutely("AT", lambda transport, data: logger.debug("AT response in InitSim fnc..."))
-        #self.write("AT", lambda transport, data: logger.debug("AT response [2] in InitSim fnc..."))
-
 
         self.write("ATE0", lambda transport, data: logger.debug(
             "hide send at command on response"))
 
         self.write("AT+CMEE=2", lambda transport, data: logger.debug("Show errors"))
 
-        #self.write("AT+CPIN?", lambda transport, data: self.simCardInserted(data))
-        #self.write("AT", lambda transport, data: self.InitSimStatus(False))
-
         self.write("AT+CPIN?")
-
-    def InitSimStatus(self, status):
-        print("InitSimStatus:", status)
-        self.InitSimInProgress = status
 
     def ActionAfterSimCardReady(self):
         logger.debug("SIM CARD READY :)")
 
         self.simCardDetected = True
         self.PinCodeRequired = False
+
+        self.emit("sim card detected")
 
         #self.write('AT+CLCK="SC",1,"1234",1')
 
@@ -561,7 +553,8 @@ class SerialReader(Protocol):
     def PinCodeNeeded(self):
         self.simCardDetected = True
         #self.PinCodeRequired = True
-
+        self.emit("sim card detected")
+        
         self.write('AT+SPIC')
 
     def SaveRemainingPinOrPukAttempts(self, pin1, pin2, puk1, puk2):

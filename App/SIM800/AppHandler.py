@@ -49,14 +49,14 @@ class AppHandler:
     def Ready(transport, data):
         logger.debug("Reader Ready.")
         transport.Ready = True
-        SocketClient.Readers.append(transport)
+        #SocketClient.Readers.append(transport)
         
-        transport.emit("sim ready")
+        transport.emit("serial ready")
 
         """
         Todo ;)
         """
-        SocketClient.SendReadersInfo()
+        #SocketClient.SendReadersInfo()
 
 
     @staticmethod
@@ -159,6 +159,9 @@ class AppHandler:
 
         if data == "SIM not inserted":
             logger.debug("Sim card not detected...")
+            transport.noSimCard()
+        elif data == "SIM failure":
+            logger.debug("SIM fail... ?!")
             transport.noSimCard()
         elif data == "incorrect password":
             logger.error("Invalid pin code!")

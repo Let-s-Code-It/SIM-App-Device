@@ -197,6 +197,7 @@ class SocketClient:
         else:
             print(["I cant send this message to socket :c Is disconnected", title, message])
         """
+        #print("emit", title, message)
 
         try:
             return sio.emit(title, message, namespace='/device')
