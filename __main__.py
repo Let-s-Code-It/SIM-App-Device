@@ -63,7 +63,7 @@ from .App.Logger import logger
 """
 Checking md5 checksum of files to find out version
 """
-from .App.Utils.MD5Sum import MD5Sum
+#from .App.Utils.MD5Sum import MD5Sum
 
 
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 	logger.info('System starts')
 
 
-	MD5Sum()
+	#MD5Sum()
 
 
 	signal.signal(signal.SIGINT, signal_handler)

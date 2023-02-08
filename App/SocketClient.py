@@ -10,6 +10,12 @@ from .Device import Device
 
 from .Logger import logger, defineLogToSocketFunction
 
+from ..Config import __VERSION__
+
+from .Utils.MD5Sum import MD5Sum
+
+import json
+
 sio = socketio.Client()
 
 @sio.event(namespace='/device')
@@ -109,7 +115,8 @@ def start_socket():
             start_socket_function_bool = True
             while(True):
                 try:
-                    sio.connect( SQL.Get("socket_address"), namespaces=['/device'] )
+                    
+                    sio.connect( SQL.Get("socket_address"), namespaces=['/device'], headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())})
                     AtLeastOnceConnected = True
                     break
                 except socketio.exceptions.ConnectionError:
@@ -118,6 +125,7 @@ def start_socket():
                 except Exception as e:
                     logger.error("Socket Error: Other... ")
                     logger.error(e)
+                    SocketClient.Disconnect()
                 finally:
                     time.sleep(10)
             start_socket_function_bool = False
@@ -203,6 +211,7 @@ class SocketClient:
             return sio.emit(title, message, namespace='/device')
         except socketio.exceptions.BadNamespaceError as err:
             logger.debug(["I cant send this message to socket :c Is disconnected", title, message, err])
+            SocketClient.Reload()
 
 
     @staticmethod
