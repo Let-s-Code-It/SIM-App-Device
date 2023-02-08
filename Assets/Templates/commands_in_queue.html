@@ -1,5 +1,27 @@
 {% include 'Includes/head.html' %}
 
+
+
+    <form class="form" method="post" enctype="multipart/form-data" autocomplete="off">
+        
+            
+        {% if added_command %}
+        <div class="alert alert-success">Command added to the queue: {{added_command}}</div>
+        {% endif %}
+
+        <label for="new_command">Add command</label>
+        <input 
+        type="text" 
+        name="new_command" 
+        id="new_command"
+        value=""
+        />
+    
+        <input type="submit" value="Save" name="Save" class="btn btn-block btn-primary" />
+    </form>
+
+    <br><hr><br>
+
     <h3>Commands in queue (<span id="commands_count"></span>)</h3>
     
     

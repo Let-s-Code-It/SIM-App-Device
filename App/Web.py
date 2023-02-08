@@ -228,15 +228,20 @@ def debug_options_post():
 
     return redirect(url_for('index'))
 
-@app.route('/debug/comands_in_queue', methods = ['GET'])
+@app.route('/debug/comands_in_queue', methods = ['GET', 'POSt'])
 def commands_in_queue():
-    return render_template('commands_in_queue.html')
+    added_command = ''
+    if request.method == 'POST':
+        added_command = request.form['new_command']
+        GetReader().protocol.write(added_command)
+    return render_template('commands_in_queue.html', added_command=added_command)
 @app.route('/debug/comands_in_queue/json', methods = ['GET'])
 def commands_in_queue_json():
     return list(map(lambda x: x.value, GetReader().protocol.queue))
 
 def WebStart():
     try:
+        time.sleep(1)
         logger.debug("launch arguments when web start:")
         logger.debug(LaunchArguments)
         app.secret_key = 'super secret key ' + ( datetime.today().strftime('%Y-%m-%d %H:%M:%S') if LaunchArguments.authorization > 1 else "" )
