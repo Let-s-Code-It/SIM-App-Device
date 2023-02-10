@@ -21,7 +21,7 @@ def MD5Sum():
                     md5_returned = hashlib.md5(data).hexdigest()
                     #print("MD5: " + file[prefix_len:] + " -> " + md5_returned)
                     ob[file[prefix_len:]] = md5_returned
-                    fp.write(file+":"+md5_returned+"\n")
+                    fp.write(file[prefix_len:]+":"+md5_returned+"\n")
     fp.close()
 
     return ob

@@ -191,6 +191,7 @@ class SocketClient:
 
         else:
             logger.debug("Socket IO is disconnected: Update address/key updated. Please wait to reconnect.")
+            SocketClient.Connect()
 
     @staticmethod
     def IsConnected():
