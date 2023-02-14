@@ -31,3 +31,13 @@ try:
 	__VERSION__ = metadata.version(__PYPI_PACKAGE_NAME__)
 except:
 	__VERSION__ = "0.0.0"
+
+
+
+"""
+ENV FILE
+"""
+from dotenv import load_dotenv
+load_dotenv()
+
+__SERIAL_LOOP_ENABLED__ = os.getenv('SerialLoopEnabled', '1') == '1'

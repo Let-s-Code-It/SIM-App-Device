@@ -253,7 +253,9 @@ class AppHandler:
         phone = d[0][1:-1]
 
         logger.debug("Incoming call: " + phone)
-
+        
+        return transport.writeOne("ATA")
+        
         transport.writeOne("AT+CHUP",  lambda transport, data: transport.emit("incoming call rejected", {
             "data": {
                 "phone": phone,

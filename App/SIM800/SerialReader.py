@@ -14,7 +14,9 @@ QueuedCommand = namedtuple('QueuedCommand', ['value', 'callback'])
 
 from ..Logger import logger
 
+from ...Config import __SERIAL_LOOP_ENABLED__
 
+import os
 
 class SerialReader(Protocol):
     """
@@ -388,6 +390,8 @@ class SerialReader(Protocol):
         #necessarily at the beginning!!
         time.sleep(10)
 
+        if not __SERIAL_LOOP_ENABLED__: return
+
         if not self.connection_confirmed:
             logger.debug("Connection with serial port not confirmed!!")
             self.writeAbsolutely("AT", lambda transport, data: self.init(restored=True))
@@ -450,7 +454,36 @@ class SerialReader(Protocol):
 
         self.emit("sim card detected")
 
-        #self.write('AT+CLCK="SC",1,"1234",1')
+
+        """
+        Sim Card Serial number ( e.g    8948000000000031386f    (yes without '+CCID:'))
+        """
+        self.write("AT+CCID",
+            lambda transport,
+            data: print("Sim Card Serial number", data))
+
+        """
+        Unique Sim Card User id ( e.g    0000000000000000    (yes without '+CIMI:'))
+        """
+        self.write("AT+CIMI",
+            lambda transport,
+            data: print("Unique Sim Card User id", data))
+
+        """
+        Mobile operator name ( e.g :    +CSPN: "T-Mobile.pl",0   )
+        """
+        self.write("AT+CSPN?",
+            lambda transport,
+            data: print("mobile operator name ", data))
+
+
+        """
+        Returns information about the status of the connection to the cellular network.
+        +CGATT: 1
+        """
+        self.write("AT+CGATT?",
+            lambda transport,
+            data: print("Returns information about the status of the connection to the cellular network. ", data))
 
         # Before (mode=1, text):
         #   self.queue.append(QueuedCommand('AT+CMGDA="DEL ALL"', lambda
