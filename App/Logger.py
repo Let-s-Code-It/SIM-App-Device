@@ -67,11 +67,11 @@ class LoggerHandler(logging.StreamHandler):
 def setup_custom_logger(name):
     formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     
-    logDirectory = __APPLICATION_DATA__ + '/logs'
+    logDirectory = os.path.join(__APPLICATION_DATA__, 'logs')
     if not os.path.exists(logDirectory):
         os.makedirs(logDirectory)
 
-    logFile = logDirectory+'/' + datetime.today().strftime('%Y-%m-%d_%H:%M:%S') + '.log'
+    logFile = os.path.join(logDirectory, datetime.today().strftime('%Y-%m-%d_%H:%M:%S') + '.log')
     print("Log file: " + logFile)
     
     handler = logging.FileHandler(logFile, mode='w')
