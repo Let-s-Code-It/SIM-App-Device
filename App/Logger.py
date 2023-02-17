@@ -71,7 +71,7 @@ def setup_custom_logger(name):
     if not os.path.exists(logDirectory):
         os.makedirs(logDirectory)
 
-    logFile = os.path.join(logDirectory, datetime.today().strftime('%Y-%m-%d_%H:%M:%S') + '.log')
+    logFile = os.path.join(logDirectory, datetime.today().strftime('%Y-%m-%d_%H-%M-%S') + '.log')
     print("Log file: " + logFile)
     
     handler = logging.FileHandler(logFile, mode='w')
