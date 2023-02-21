@@ -173,6 +173,7 @@ def config():
             if port[0] == request.form['serial_port']:
                 SQL.Set('port_name', port[0])
                 SQL.Set('port_friendly_name', port[1])
+                SQL.Set('port_hwid', port[2])
 
         for apn_key in apn_keys_list:
             if request.form[apn_key]:
@@ -182,6 +183,9 @@ def config():
         
         if GetReader() != None:
             restart_required = True
+
+        if request.form['response_to_incoming_call']:
+            SQL.Set("response_to_incoming_call", request.form['response_to_incoming_call'])
         
         return redirect(url_for('index'))
     else:
@@ -201,7 +205,10 @@ def config():
             apn_mms_templates=apn_mms_templates, 
             ports=serial.tools.list_ports.comports(), 
             target_port=SQL.Get("port_name"),
-            apn_data=get_apn_data()
+            apn_data=get_apn_data(),
+
+            response_to_incoming_call_methods={"pick_up":"Pick Up", "reject":"Reject", "ignore":"Ignore"},
+            response_to_incoming_call=SQL.Get("response_to_incoming_call") if SQL.Get("response_to_incoming_call") else "reject"
         )
 
 

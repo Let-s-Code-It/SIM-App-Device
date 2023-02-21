@@ -90,6 +90,7 @@ class SerialReader(Protocol):
             'my_phone_number': self.my_phone_number,
             'port_name': SQL.Get('port_name'),
             'port_friendly_name': SQL.Get('port_friendly_name'),
+            'port_hwid': SQL.Get('port_hwid'),
             'serial_number': self.serial_number,
             'serial_port_responds': self.connection_confirmed,
             'sim_card_detected': self.simCardDetected,

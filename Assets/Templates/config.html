@@ -11,11 +11,28 @@
 
       <div>
         <br><h3>Select Serial Port</h3><br>
-        
+
         {% for port in ports %}
           <div>
             <input {% if target_port == port[0] %} checked {% endif %} value="{{port[0]}}" type="radio" name="serial_port" id="serial_port_{{loop.index}}">
             <label for="serial_port_{{loop.index}}">{{port[0]}} -> {{port[1]}}</label>
+          </div>
+        {% endfor %}
+
+        <br><hr><br>
+
+      </div>
+
+
+
+
+      <div>
+        <br><h3>Response to incoming call</h3><br>
+
+        {% for key in response_to_incoming_call_methods %}
+          <div>
+            <input {% if response_to_incoming_call == key %} checked {% endif %} value="{{key}}" type="radio" name="response_to_incoming_call" id="response_to_incoming_call_{{loop.index}}" required>
+            <label for="response_to_incoming_call_{{loop.index}}">{{response_to_incoming_call_methods[key]}}</label>
           </div>
         {% endfor %}
 
@@ -36,13 +53,12 @@
         <input disabled checked id="receive_sms" name="receive_sms" type="checkbox">
         <label for="receive_sms">Recive SMS</label>
       </div>
-      
-      <div>
-        <input disabled checked id="answer_calls" name="answer_calls" type="checkbox">
-        <label for="answer_calls">Answer incoming calls</label>
-      </div>
 
       <br><hr><br>
+
+
+
+
 
       <h3>APN MMS</h3>
 

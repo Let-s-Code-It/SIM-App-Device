@@ -253,14 +253,6 @@ class AppHandler:
         phone = d[0][1:-1]
 
         logger.debug("Incoming call: " + phone)
-        
-        return transport.writeOne("ATA")
-        
-        transport.writeOne("AT+CHUP",  lambda transport, data: transport.emit("incoming call rejected", {
-            "data": {
-                "phone": phone,
-            }
-        }))
 
 
         transport.emit("incoming call", {
@@ -268,6 +260,28 @@ class AppHandler:
                 "phone": phone,
             }
         })
+
+        response_to_incoming_call = SQL.Get("response_to_incoming_call")
+
+        if response_to_incoming_call == "pick_up":
+            transport.writeOne("ATA",  lambda transport, data: transport.emit("incoming call picked up", {
+                "data": {
+                    "phone": phone,
+                }
+            }))
+        elif response_to_incoming_call == "reject":
+            transport.writeOne("AT+CHUP",  lambda transport, data: transport.emit("incoming call rejected", {
+                "data": {
+                    "phone": phone,
+                }
+            }))
+        else:
+            transport.emit("incoming call ignored", {
+                "data": {
+                    "phone": phone,
+                }
+            })
+
     
     @staticmethod
     def cpin(transport, data):
