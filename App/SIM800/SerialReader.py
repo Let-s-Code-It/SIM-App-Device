@@ -80,6 +80,10 @@ class SerialReader(Protocol):
         self.serial_number = ''
         self.my_phone_number = ''
 
+        self.sim_card_serial_number = ''
+        self.sim_card_id = ''
+        self.service_provider_name_from_sim = ''
+
         if restored:
             self.emit("serial connection confirmed")
 
@@ -95,7 +99,10 @@ class SerialReader(Protocol):
             'serial_port_responds': self.connection_confirmed,
             'sim_card_detected': self.simCardDetected,
             'pin_code_required': self.PinCodeRequired,
-            'serial_port_ready': self.Ready
+            'serial_port_ready': self.Ready,
+            'sim_card_serial_number': self.sim_card_serial_number,
+            'sim_card_id': self.sim_card_id,
+            'service_provider_name_from_sim': self.service_provider_name_from_sim
         }
 
     def emit(self, title, message={}):
@@ -459,23 +466,17 @@ class SerialReader(Protocol):
         """
         Sim Card Serial number ( e.g    8948000000000031386f    (yes without '+CCID:'))
         """
-        self.write("AT+CCID",
-            lambda transport,
-            data: print("Sim Card Serial number", data))
+        self.write("AT+CCID", AppHandler.SimCardSerialNumber)
 
         """
         Unique Sim Card User id ( e.g    0000000000000000    (yes without '+CIMI:'))
         """
-        self.write("AT+CIMI",
-            lambda transport,
-            data: print("Unique Sim Card User id", data))
+        self.write("AT+CIMI", AppHandler.SimCardId)
 
         """
         Mobile operator name ( e.g :    +CSPN: "T-Mobile.pl",0   )
         """
-        self.write("AT+CSPN?",
-            lambda transport,
-            data: print("mobile operator name ", data))
+        self.write("AT+CSPN?")
 
 
         """

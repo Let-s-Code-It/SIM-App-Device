@@ -43,6 +43,7 @@ class AppHandler:
         
         self.reader.bind_event("+SPIC", AppHandler.RemainingPinOrPukAttempts)
 
+        self.reader.bind_event("+CSPN", AppHandler.GetServiceProviderNameFromSIM)
 
 
     @staticmethod
@@ -312,7 +313,27 @@ class AppHandler:
         [pin1, pin2, puk1, puk2] = d
         transport.SaveRemainingPinOrPukAttempts(pin1, pin2, puk1, puk2)
 
+    @staticmethod
+    def SimCardSerialNumber(transport, data:list):
+        logger.debug("Sim Card Serial Number (DATA): " + data[0])
+        if len(data) == 1:
+            logger.debug("Sim Card Serial Number: " + data[0])
+            transport.sim_card_serial_number = data[0]
+        else:
+            logger.debug("Sim Card Serial Number: ERROR!")
 
-
-
+    @staticmethod
+    def SimCardId(transport, data:list):
+        logger.debug("Sim Card ID (DATA): " + data[0])
+        if len(data) == 1:
+            logger.debug("Sim Card ID: " + data[0])
+            transport.sim_card_id = data[0]
+        else:
+            logger.debug("Sim Card ID: ERROR!")
         
+    @staticmethod
+    def GetServiceProviderNameFromSIM(transport, data:str):
+        logger.debug("GetServiceProviderNameFromSIM (DATA):" + data)
+        name = data.split(',')[0].strip('"')
+        logger.debug("GetServiceProviderNameFromSIM:" + name)
+        transport.service_provider_name_from_sim = name
