@@ -115,23 +115,21 @@ This is an example of how to list things you need to use the software and how to
 _Installation is very simple, because the software shown here is published in the [Docker Hub](https://hub.docker.com/r/karlos98/sim-app-device)_
 
 
-* Download and run the image 
+* Download .sh file
    ```sh
-   docker run --privileged  -v ~/SIM-Data:/SIM-Data -p 8098:8098 -it karlos98/sim-app-device:amd
+    curl -o sim-app.sh https://raw.githubusercontent.com/Let-s-Code-It/SIM-App-Device/master/sim-app.sh
+
 
    ```
 
-* If you are running on a raspberry pi change the tag to "pi"
+* Set permissions
   ```sh
-  docker run --privileged  -v ~/SIM-Data:/SIM-Data -p 8098:8098 -it karlos98/sim-app-device:pi
+  chmod +x sim-app.sh
   ```
 
-* If you are installing on an unsupported platform build the container yourself using a Dockerfile with this content:
+* Build and run
     ```text 
-    FROM python:3.7.2
-    RUN python3 -m pip install --upgrade pip
-    RUN python3 -m pip install lci-sim-app-device
-    CMD [ "python3", "-m", "lci-sim-app-device", "--dir=/SIM-Data" ]
+    ./sim-app.sh
     ```
 
 
@@ -219,9 +217,9 @@ _What does the application offer or will offer_
 
 _When you go to the webserver of the installed application (port 8098), you will see the versions of the application used at the top. When an update is available, a message will also be visible next to the version. Do them right away, because the changes may be so big that the device may not work properly. Now we will move on to how to perform such updates._
 
-* If you are using docker (```choose "pi" or "amd" TAG!```)
+* If you are using docker
   ```sh
-  docker pull karlos98/sim-app-device:TAG_HERE
+  curl -o sim-app.sh https://raw.githubusercontent.com/Let-s-Code-It/SIM-App-Device/master/sim-app.sh && ./sim-app.sh update
   ```
 
 
