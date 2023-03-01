@@ -11,7 +11,7 @@ if [ "$1" == "stop" ]; then
   docker stop $(docker ps -q --filter ancestor="$IMAGE_NAME")
 else
   # Check if a container with the image name is already running
-  if docker ps -a -f "ancestor=$IMAGE_NAME" | grep -q "$IMAGE_NAME"; then
+  if docker ps -f "ancestor=$IMAGE_NAME" | grep -q "$IMAGE_NAME"; then
     echo "Container is already running."
   else
     # Check if "update" argument is passed
