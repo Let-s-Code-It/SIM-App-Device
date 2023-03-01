@@ -7,11 +7,11 @@
 /App/Utils/RestartProgram.py:bdef17c66c1f32d97c7eb9fb33e06737
 /App/Utils/modification_date.py:41b2cdb5290f01d70fa5705349748ae0
 /App/Utils/MD5Sum.py:04630a8ad2c982aa6359f05194c15f35
-/App/Web.py:f21faf598bf5fbdda1e0525f051dbde4
+/App/Web.py:cf8c36a1bd372ae3a8a97cc6f3d5861e
 /App/APN.py:6869a42ea536e9f443adfb3f493252a3
 /App/SocketClient.py:2ae442617d237553823d22698e1005e3
 /App/Device.py:846464de2efe5767392d9b24c6ffc6c4
-/App/Logger.py:55af0d11d1724374c34221df3c346c81
+/App/Logger.py:7bac36e57266a18bb8dcf5eb1a19174e
 /App/LaunchArguments.py:c82cdcffbe8ae48592337cc17ad891d6
 /App/SQL.py:d5c31fd6c88f0b3dc48e017980c188ce
 /App/SIM800/__init__.py:d41d8cd98f00b204e9800998ecf8427e

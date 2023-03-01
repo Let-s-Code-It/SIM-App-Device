@@ -1,0 +1,11 @@
+{% include 'Includes/head.html' %}
+ 
+<div class="alert">
+    Logs directory:<br>{{path}}
+</div>
+
+{% for log in txt_files %}
+<br><a  class="a-btn" href="/debug/console_logs/download/{{log}}" download=""><button class="btn btn-block btn-primary">{{log}}</button></a>
+{% endfor %}
+
+{% include 'Includes/footer.html' %}

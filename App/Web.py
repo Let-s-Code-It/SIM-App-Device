@@ -1,6 +1,6 @@
 from threading import Thread
 
-from flask import Flask, request, render_template, url_for, redirect, url_for, json, session, send_from_directory
+from flask import Flask, request, render_template, url_for, redirect, url_for, json, session, send_from_directory,send_file
 
 import time
 
@@ -30,7 +30,7 @@ from .Utils.modification_date import modification_date
 
 from .APN import apn_configured_check, apn_keys_list, get_apn_data
 
-from ..Config import __APPLICATION_DATA__,  __APPLICATION_PATH__, __VERSION__, __PYPI_PACKAGE_NAME__, __AUTHOR_PAGE__, __HOW_TO_UPDATE_PAGE__
+from ..Config import __APPLICATION_DATA__,  __APPLICATION_PATH__, __VERSION__, __PYPI_PACKAGE_NAME__, __AUTHOR_PAGE__, __HOW_TO_UPDATE_PAGE__, __CONSOLE_LOGS_PATH__
 
 app = Flask(
     __name__, 
@@ -266,5 +266,17 @@ def pin():
 
     return render_template('pin.html', ready=ready)
 
+
+@app.route('/debug/console_logs', methods = ['GET'])
+def console_logs():
+    return render_template('console_logs.html', 
+    path=__CONSOLE_LOGS_PATH__,
+    txt_files = [f for f in os.listdir(__CONSOLE_LOGS_PATH__) if os.path.isfile(os.path.join(__CONSOLE_LOGS_PATH__, f)) and f.endswith('.txt')]
+    )
+
+@app.route('/debug/console_logs/download/<filename>.txt')
+def download_console_log_file(filename):
+    file = os.path.join(__CONSOLE_LOGS_PATH__, filename+'.txt')
+    return send_file(file, as_attachment=True)
 
 WebThread = Thread(target=WebStart)

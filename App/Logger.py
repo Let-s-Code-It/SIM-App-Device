@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 import time
 
-from ..Config import __APPLICATION_DATA__
+from ..Config import __APPLICATION_DATA__, __CONSOLE_LOGS_PATH__
 
 
 
@@ -67,11 +67,10 @@ class LoggerHandler(logging.StreamHandler):
 def setup_custom_logger(name):
     formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     
-    logDirectory = os.path.join(__APPLICATION_DATA__, 'logs')
-    if not os.path.exists(logDirectory):
-        os.makedirs(logDirectory)
+    if not os.path.exists(__CONSOLE_LOGS_PATH__):
+        os.makedirs(__CONSOLE_LOGS_PATH__)
 
-    logFile = os.path.join(logDirectory, datetime.today().strftime('%Y-%m-%d_%H-%M-%S') + '.log')
+    logFile = os.path.join(__CONSOLE_LOGS_PATH__, datetime.today().strftime('%Y-%m-%d_%H-%M-%S') + '.console.txt')
     print("Log file: " + logFile)
     
     handler = logging.FileHandler(logFile, mode='w')

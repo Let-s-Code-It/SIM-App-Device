@@ -32,7 +32,7 @@ try:
 except:
 	__VERSION__ = "0.0.0"
 
-
+__CONSOLE_LOGS_PATH__ = os.path.join(__APPLICATION_DATA__, 'logs')
 
 """
 ENV FILE
