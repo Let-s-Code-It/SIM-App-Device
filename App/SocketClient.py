@@ -118,6 +118,7 @@ def start_socket():
                     
                     sio.connect( SQL.Get("socket_address"), namespaces=['/device'], headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())})
                     AtLeastOnceConnected = True
+                    logger.debug("Socket: sio.connect method succesfully")
                     break
                 except socketio.exceptions.ConnectionError:
                     logger.error("Socket Connection Error!")
@@ -173,9 +174,14 @@ class SocketClient:
 
 
     @staticmethod
-    def Disconnect():
+    def Disconnect(force=False):
         logger.debug("-----> sio.disconnect() method")
-        sio.disconnect()
+
+        if force:
+            logger.debug("Force disconnect!")
+            sio.eio.disconnect()
+        else:
+            sio.disconnect()
 
         SocketClient.Logged = False
         defineLogToSocketFunction(None)

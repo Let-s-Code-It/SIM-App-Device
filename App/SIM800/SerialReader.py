@@ -434,7 +434,7 @@ class SerialReader(Protocol):
             self.emit("keep alive")
         else:
             SocketClient.keepAliveLastSentTime = 0
-            SocketClient.Disconnect()
+            SocketClient.Disconnect(force=True)
             SocketClient.Connect()
             logger.info("Socket restart - keep alive limit...")
 
