@@ -3,7 +3,7 @@
 # Definition of variables with image name and Dockerfile path
 IMAGE_NAME="karlos98/sim-app-device"
 DOCKERFILE_URL="https://raw.githubusercontent.com/Let-s-Code-It/SIM-App-Device/master/Dockerfile"
-DOCKERFILE_PATH="Sim-App-Dockerfile"
+DOCKERFILE_PATH="$(mktemp).Sim-App-Dockerfile"
 
 function check_container_running {
   # Check if a container with the image name is already running
