@@ -6,7 +6,7 @@ from .AppHandler import AppHandler
 
 from ..Utils.UTF16 import UTF16
 
-from ..SocketClient import SocketClient
+from ..SocketClient import SocketClient, sio
 
 from ..SQL import SQL
 
@@ -425,6 +425,7 @@ class SerialReader(Protocol):
         logger.debug("Reader loop :)")
 
     def keepAlive(self):
+        logger.debug('keepAlive -> sio.eio.current_transport:' + sio.eio.current_transport)
         if not SocketClient.IsConnected():
             SocketClient.keepAliveLastSentTime = 0
         elif SocketClient.keepAliveLastSentTime == 0 or (time.time() - SocketClient.keepAliveLastSentTime) < 120:

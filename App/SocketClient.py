@@ -102,6 +102,11 @@ def on_message(data):
     )"""
 
 
+@sio.on('*')
+def catch_all(event, data):
+    print(event)
+    print(data)
+    logger.debug("Undefined socket event: '" + event + "', with data: " + data)
 
 
 AtLeastOnceConnected = False
@@ -116,7 +121,13 @@ def start_socket():
             while(True):
                 try:
                     
-                    sio.connect( SQL.Get("socket_address"), namespaces=['/device'], headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())})
+                    sio.connect( 
+                        SQL.Get("socket_address"), 
+                        namespaces=['/device'], 
+                        headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
+                        transports=['websocket']
+                        )
+
                     AtLeastOnceConnected = True
                     logger.debug("Socket: sio.connect method succesfully")
                     break
