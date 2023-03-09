@@ -118,28 +118,28 @@ def start_socket():
     if not sio.connected:
         if not start_socket_function_bool:
             start_socket_function_bool = True
-            while(True):
-                try:
-                    
-                    sio.connect( 
-                        SQL.Get("socket_address"), 
-                        namespaces=['/device'], 
-                        headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
-                        transports=['websocket']
-                        )
+            #while(True):
+            try:
+                
+                sio.connect( 
+                    SQL.Get("socket_address"), 
+                    namespaces=['/device'], 
+                    headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
+                    transports=['websocket']
+                    )
 
-                    AtLeastOnceConnected = True
-                    logger.debug("Socket: sio.connect method succesfully")
-                    break
-                except socketio.exceptions.ConnectionError:
-                    logger.error("Socket Connection Error!")
-                    SocketClient.Disconnect()
-                except Exception as e:
-                    logger.error("Socket Error: Other... ")
-                    logger.error(e)
-                    SocketClient.Disconnect()
-                finally:
-                    time.sleep(10)
+                AtLeastOnceConnected = True
+                logger.debug("Socket: sio.connect method succesfully")
+                #break
+            except socketio.exceptions.ConnectionError:
+                logger.error("Socket Connection Error!")
+                SocketClient.Disconnect()
+            except Exception as e:
+                logger.error("Socket Error: Other... ")
+                logger.error(e)
+                SocketClient.Disconnect()
+            finally:
+                time.sleep(10)
             start_socket_function_bool = False
         else:
             logger.debug("double start_socket function blocked")
