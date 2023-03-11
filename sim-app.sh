@@ -98,7 +98,7 @@ case "$1" in
   update )
     update_container
     ;;
-  update )
+  upgrade )
     upgrade_sh
     ;;
   status )
