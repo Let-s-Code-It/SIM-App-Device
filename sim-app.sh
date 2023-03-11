@@ -4,8 +4,7 @@
 IMAGE_NAME="karlos98/sim-app-device"
 DOCKERFILE_URL="https://raw.githubusercontent.com/Let-s-Code-It/SIM-App-Device/master/Dockerfile"
 DOCKERFILE_PATH="$(mktemp --suffix=-Sim-App-Dockerfile)"
-
-
+SH_FILE_PATH="https://raw.githubusercontent.com/Let-s-Code-It/SIM-App-Device/master/sim-app.sh"
 
 function check_container_running {
   # Check if a container with the image name is already running
@@ -57,6 +56,29 @@ function update_container {
   start_container
 }
 
+function check_new_sh_file_version {
+  new_version=$(curl -s "$SH_FILE_PATH" | md5sum)
+  current_version=$(cat $0 | md5sum)
+
+  if [ "$new_version" != "$current_version" ]; then
+    #new .sh file version available!
+    echo "Current sh: $current_version"
+    echo "New sh: $new_version"
+    return 0
+  else
+    return 1
+  fi
+}
+
+function upgrade_sh {
+  if check_new_sh_file_version; then
+    curl -o $0 $SH_FILE_PATH
+    echo -e "\033[0;33mA new version has been saved at: $0 \033[0m"
+  else
+    echo "The sim-app.sh launcher version is up to date"
+  fi
+}
+
 # Check arguments
 case "$1" in
   start )
@@ -76,6 +98,9 @@ case "$1" in
   update )
     update_container
     ;;
+  update )
+    upgrade_sh
+    ;;
   status )
     if check_container_running; then
       echo "Container is running."
@@ -84,7 +109,13 @@ case "$1" in
     fi
     ;;
   * )
-    echo "Usage: $0 {start|stop|update|status}"
-    exit 1
+    echo -e "\033[0;34mUsage: $0 {start|stop|update|upgrade|status}\033[0m"
+    #exit 1
     ;;
 esac
+
+#check new sh file version
+if check_new_sh_file_version; then
+  echo -e "\033[0;33mINFO: A new version of sim-app.sh has been detected on github"
+  echo -e "INFO: use the command with the 'upgrade' argument to upgrade the sh file\033[0m"
+fi
