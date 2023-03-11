@@ -5,6 +5,8 @@ IMAGE_NAME="karlos98/sim-app-device"
 DOCKERFILE_URL="https://raw.githubusercontent.com/Let-s-Code-It/SIM-App-Device/master/Dockerfile"
 DOCKERFILE_PATH="$(mktemp --suffix=-Sim-App-Dockerfile)"
 
+
+
 function check_container_running {
   # Check if a container with the image name is already running
   if docker ps -f "ancestor=$IMAGE_NAME" | grep -q "$IMAGE_NAME"; then
