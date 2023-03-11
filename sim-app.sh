@@ -72,8 +72,15 @@ function check_new_sh_file_version {
 
 function upgrade_sh {
   if check_new_sh_file_version; then
-    curl -o $0 $SH_FILE_PATH
-    echo -e "\033[0;33mA new version has been saved at: $0 \033[0m"
+    if [ -w "$0" ]; then
+        curl -o "$0" "$SH_FILE_PATH"
+        echo -e "\033[0;33mA new version has been saved at: $0 \033[0m"
+    else
+        echo -e "\033[0;31mYou do not have permission to modify the file: $0"
+        echo "Try running the command as administrator. Use the sudo command:"
+        echo -e "sudo $0 upgrade"
+        exit 1
+    fi
   else
     echo "The sim-app.sh launcher version is up to date"
   fi
@@ -110,7 +117,6 @@ case "$1" in
     ;;
   * )
     echo -e "\033[0;34mUsage: $0 {start|stop|update|upgrade|status}\033[0m"
-    #exit 1
     ;;
 esac
 
