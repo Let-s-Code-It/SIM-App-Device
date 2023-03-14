@@ -120,7 +120,8 @@ def start_socket():
             start_socket_function_bool = True
             #while(True):
             try:
-                
+                logger.debug("start_socket - try")
+
                 sio.connect( 
                     SQL.Get("socket_address"), 
                     namespaces=['/device'], 
@@ -139,7 +140,8 @@ def start_socket():
                 logger.error(e)
                 SocketClient.Disconnect()
             finally:
-                time.sleep(10)
+                logger.debug("start_socket - finally method")
+                #time.sleep(10)
             start_socket_function_bool = False
         else:
             logger.debug("double start_socket function blocked")
@@ -164,8 +166,9 @@ class SocketClient:
 
     @staticmethod
     def Connect():
-        SocketClientThread = Thread(target=start_socket)
-        SocketClientThread.start()
+        #SocketClientThread = Thread(target=start_socket)
+        #SocketClientThread.start()
+        start_socket()
 
     @staticmethod
     def UpdateLoginKey(key):
@@ -191,8 +194,8 @@ class SocketClient:
         if force:
             logger.debug("Force disconnect!")
             sio.eio.disconnect()
-        else:
-            sio.disconnect()
+
+        sio.disconnect()
 
         SocketClient.Logged = False
         defineLogToSocketFunction(None)
