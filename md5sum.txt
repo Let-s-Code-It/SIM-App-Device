@@ -7,7 +7,7 @@
 /App/Utils/RestartProgram.py:bdef17c66c1f32d97c7eb9fb33e06737
 /App/Utils/modification_date.py:41b2cdb5290f01d70fa5705349748ae0
 /App/Utils/MD5Sum.py:04630a8ad2c982aa6359f05194c15f35
-/App/Web.py:cf8c36a1bd372ae3a8a97cc6f3d5861e
+/App/Web.py:fe6e4e526e7a463969d167d238739da1
 /App/APN.py:6869a42ea536e9f443adfb3f493252a3
 /App/SocketClient.py:fcfce2cc32bb7bc10cbf2e1627d991c1
 /App/Device.py:846464de2efe5767392d9b24c6ffc6c4

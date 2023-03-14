@@ -269,9 +269,14 @@ def pin():
 
 @app.route('/debug/console_logs', methods = ['GET'])
 def console_logs():
+
+    txt_files = [f for f in os.listdir(__CONSOLE_LOGS_PATH__) if os.path.isfile(os.path.join(__CONSOLE_LOGS_PATH__, f)) and f.endswith('.txt')]
+    txt_files_sorted = sorted(txt_files, key=lambda f: os.path.getctime(os.path.join(__CONSOLE_LOGS_PATH__, f)), reverse=True)
+
+
     return render_template('console_logs.html', 
     path=__CONSOLE_LOGS_PATH__,
-    txt_files = [f for f in os.listdir(__CONSOLE_LOGS_PATH__) if os.path.isfile(os.path.join(__CONSOLE_LOGS_PATH__, f)) and f.endswith('.txt')]
+    txt_files = txt_files_sorted
     )
 
 @app.route('/debug/console_logs/download/<filename>.txt')
