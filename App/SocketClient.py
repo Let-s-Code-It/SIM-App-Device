@@ -35,14 +35,11 @@ def connect_error(data):
 @sio.event(namespace='/device')
 def disconnect():
     logger.debug("I'm disconnected!")
-    SocketClient.Disconnect()
+    SocketClient.Logged = False
+    defineLogToSocketFunction(None)
+
     SocketClient.Connect()
 
-
-
-@sio.event(namespace='/device')
-def message(data):
-    logger.debug(['I received a message!!!!', data])
 
 @sio.on('my message', namespace='/device')
 def on_message(data):
@@ -56,18 +53,18 @@ def on_message(data):
 
 
 @sio.on('first login', namespace='/device')
-def on_message(data):
+def handle1(data):
     logger.debug(['Static login key from socket server: ', data])
     SQL.Set("socket_unique_auth_key", data['input'])
     SocketClient.emit("login", data['input'])
 
 @sio.on('first login fail', namespace='/device')
-def on_message(data):
+def handle2(data):
     logger.debug("Invalid socket unique login key (first login)...")
     SocketClient.Logged = False
 
 @sio.on('login', namespace='/device')
-def on_message():
+def handle3():
     logger.debug('Loggin success.')
     logger.info('Logged in to the socket server')
     logger.debug(getSystemInfo())
@@ -79,18 +76,18 @@ def on_message():
     defineLogToSocketFunction(SocketClient.LoggerLog)
 
 @sio.on('login fail', namespace='/device')
-def on_message(data):
+def handle4(data):
     logger.debug("Invalid socket unique login key...")
     SocketClient.Logged = False
 
 @sio.on('device data', namespace='/device')
-def on_message(data):
+def handle5(data):
     logger.debug("Your Device Name: " + data['friendly_name'])
     Device.Adopted = data['adopted']
     logger.debug(["Adopt Status: ", Device.Adopted, data])
 
 @sio.on('send message', namespace='/device')
-def on_message(data):
+def handle6(data):
     logger.debug("sending a new message at the request of the sim app panel ")
     logger.debug(data)
     SocketClient.Readers[0].send_sms_from_panel(data)
@@ -112,41 +109,61 @@ def catch_all(event, data):
 AtLeastOnceConnected = False
 
 start_socket_function_bool = False
+# def start_socket():
+#     global start_socket_function_bool
+#     time.sleep(3)
+#     if not sio.connected:
+#         if not start_socket_function_bool:
+#             start_socket_function_bool = True
+#             #while(True):
+#             try:
+#                 logger.debug("start_socket - try")
+
+#                 sio.connect( 
+#                     SQL.Get("socket_address"), 
+#                     namespaces=['/device'], 
+#                     headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
+#                     transports=['websocket']
+#                     )
+
+#                 AtLeastOnceConnected = True
+#                 logger.debug("Socket: sio.connect method succesfully")
+#                 #break
+#             except socketio.exceptions.ConnectionError:
+#                 logger.error("Socket Connection Error!")
+#                 SocketClient.Disconnect()
+#             except Exception as e:
+#                 logger.error("Socket Error: Other... ")
+#                 logger.error(e)
+#                 SocketClient.Disconnect()
+#             finally:
+#                 logger.debug("start_socket - finally method")
+#                 #time.sleep(10)
+#             start_socket_function_bool = False
+#         else:
+#             logger.debug("double start_socket function blocked")
+#     else:
+#         logger.debug("start_socket function blocked - socket is connected")
+
 def start_socket():
-    global start_socket_function_bool
-    time.sleep(3)
-    if not sio.connected:
-        if not start_socket_function_bool:
-            start_socket_function_bool = True
-            #while(True):
-            try:
-                logger.debug("start_socket - try")
+    try:
+        logger.debug("start_socket - try")
 
-                sio.connect( 
-                    SQL.Get("socket_address"), 
-                    namespaces=['/device'], 
-                    headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
-                    transports=['websocket']
-                    )
+        sio.connect( 
+            SQL.Get("socket_address"), 
+            namespaces=['/device'], 
+            headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
+            transports=['websocket']
+            )
 
-                AtLeastOnceConnected = True
-                logger.debug("Socket: sio.connect method succesfully")
-                #break
-            except socketio.exceptions.ConnectionError:
-                logger.error("Socket Connection Error!")
-                SocketClient.Disconnect()
-            except Exception as e:
-                logger.error("Socket Error: Other... ")
-                logger.error(e)
-                SocketClient.Disconnect()
-            finally:
-                logger.debug("start_socket - finally method")
-                #time.sleep(10)
-            start_socket_function_bool = False
-        else:
-            logger.debug("double start_socket function blocked")
-    else:
-        logger.debug("start_socket function blocked - socket is connected")
+        logger.debug("Socket: sio.connect method succesfully")
+    except socketio.exceptions.ConnectionError:
+        logger.error("Socket Connection Error!")
+    except Exception as e:
+        logger.error("Socket Error: Other... ")
+        logger.error(e)
+    finally:
+        logger.debug("start_socket - finally method")
 
 
 
@@ -189,11 +206,11 @@ class SocketClient:
 
     @staticmethod
     def Disconnect(force=False):
-        logger.debug("-----> sio.disconnect() method")
+        logger.debug("SocketClient.Disconnect() method")
 
         if force:
             logger.debug("Force disconnect!")
-            sio.eio.disconnect()
+            #sio.eio.disconnect()
 
         sio.disconnect()
 
@@ -232,7 +249,7 @@ class SocketClient:
             return sio.emit(title, message, namespace='/device')
         except socketio.exceptions.BadNamespaceError as err:
             logger.debug(["I cant send this message to socket :c Is disconnected", title, message, err])
-            SocketClient.Reload()
+            #SocketClient.Reload()
 
 
     @staticmethod

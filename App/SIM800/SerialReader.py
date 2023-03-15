@@ -87,7 +87,7 @@ class SerialReader(Protocol):
         if restored:
             self.emit("serial connection confirmed")
 
-        self.reconfigure()
+        #self.reconfigure()
 
     def GetInfo(self):
         return {
@@ -434,10 +434,10 @@ class SerialReader(Protocol):
             logger.debug("Keep alive time: " + str(time.time() - SocketClient.keepAliveLastSentTime))
             self.emit("keep alive")
         else:
+            #SocketClient.Connect()
+            logger.info("Socket restart required - keep alive limit...")
             SocketClient.keepAliveLastSentTime = 0
             SocketClient.Disconnect(force=True)
-            SocketClient.Connect()
-            logger.info("Socket restart - keep alive limit...")
 
     def noSimCard(self):
         logger.debug("noSimCard method...")
