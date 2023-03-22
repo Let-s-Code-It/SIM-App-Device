@@ -41,3 +41,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 __SERIAL_LOOP_ENABLED__ = os.getenv('SerialLoopEnabled', '1') == '1'
+
+
+__WEB_PORT__ = LaunchArguments.webport
+
+
+__ADMIN_AUTHORIZATION_ENABLED__ = LaunchArguments.authorization
+__ADMIN_PASSWORD__ = LaunchArguments.password if LaunchArguments.password != '' else os.getenv('AdminPassword', '') if os.getenv('AdminPassword', '') != '' else 'admin'

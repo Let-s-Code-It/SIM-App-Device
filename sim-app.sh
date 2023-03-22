@@ -30,8 +30,15 @@ function start_container {
     docker build -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" .
   fi
 
+  if [ -e ~/".sim-env" ]; then
+    env="--env-file ~/.sim-env"
+    echo "Found .sim-env file in home directory."
+  else
+    env=""
+  fi
+
   # Run the container in detached mode
-  docker run -v /etc/localtime:/etc/localtime:ro --restart=always --privileged -v ~/SIM-Data:/SIM-Data -p 8098:8098 -d "$IMAGE_NAME"
+  docker run $env -v /etc/localtime:/etc/localtime:ro --restart=always --privileged -v ~/SIM-Data:/SIM-Data -p 8098:8098 -d "$IMAGE_NAME"
 }
 
 function update_container {

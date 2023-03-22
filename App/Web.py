@@ -30,7 +30,7 @@ from .Utils.modification_date import modification_date
 
 from .APN import apn_configured_check, apn_keys_list, get_apn_data
 
-from ..Config import __APPLICATION_DATA__,  __APPLICATION_PATH__, __VERSION__, __PYPI_PACKAGE_NAME__, __AUTHOR_PAGE__, __HOW_TO_UPDATE_PAGE__, __CONSOLE_LOGS_PATH__
+from ..Config import __APPLICATION_DATA__,  __APPLICATION_PATH__, __VERSION__, __PYPI_PACKAGE_NAME__, __AUTHOR_PAGE__, __HOW_TO_UPDATE_PAGE__, __CONSOLE_LOGS_PATH__, __ADMIN_PASSWORD__, __ADMIN_AUTHORIZATION_ENABLED__, __WEB_PORT__
 
 app = Flask(
     __name__, 
@@ -66,7 +66,7 @@ def inject_stage_and_region():
 
 @app.before_request
 def check_session():
-    if LaunchArguments.authorization > 0:
+    if __ADMIN_AUTHORIZATION_ENABLED__ > 0:
         if not session.get("legit"):
             if request.endpoint is 'json_data':
                 d = {
@@ -84,11 +84,11 @@ def check_session():
 @app.route("/login", methods = ["GET", "POST"])
 def login():
 
-    if LaunchArguments.authorization == 0:
+    if __ADMIN_AUTHORIZATION_ENABLED__ == 0:
         return redirect(url_for('index'))
 
     if request.method == 'POST':
-        if request.form['password'] == LaunchArguments.password:
+        if request.form['password'] == __ADMIN_PASSWORD__:
             session['legit'] = True
             return redirect(url_for('index'))
         else:
@@ -249,10 +249,8 @@ def commands_in_queue_json():
 def WebStart():
     try:
         time.sleep(1)
-        logger.debug("launch arguments when web start:")
-        logger.debug(LaunchArguments)
-        app.secret_key = 'super secret key ' + ( datetime.today().strftime('%Y-%m-%d %H:%M:%S') if LaunchArguments.authorization > 1 else "" )
-        app.run(debug=False, host='0.0.0.0', port=LaunchArguments.webport)
+        app.secret_key = 'super secret key ' + ( datetime.today().strftime('%Y-%m-%d %H:%M:%S') if __ADMIN_AUTHORIZATION_ENABLED__ > 1 else "" )
+        app.run(debug=False, host='0.0.0.0', port=__WEB_PORT__)
     except:
         logger.debug("WebServer start problem!")
 
