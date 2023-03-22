@@ -15,7 +15,8 @@ from ..Config import __VERSION__
 from .Utils.MD5Sum import MD5Sum
 
 import json
-
+import os
+#sio = socketio.Client(logger=True, engineio_logger=True)
 sio = socketio.Client()
 
 @sio.event(namespace='/device')
@@ -146,6 +147,7 @@ start_socket_function_bool = False
 #         logger.debug("start_socket function blocked - socket is connected")
 
 def start_socket():
+    start_success = False
     try:
         logger.debug("start_socket - try")
 
@@ -154,8 +156,8 @@ def start_socket():
             namespaces=['/device'], 
             headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
             transports=['websocket']
-            )
-
+        )
+        start_success = True
         logger.debug("Socket: sio.connect method succesfully")
     except socketio.exceptions.ConnectionError:
         logger.error("Socket Connection Error!")
@@ -163,6 +165,9 @@ def start_socket():
         logger.error("Socket Error: Other... ")
         logger.error(e)
     finally:
+        if not start_success:
+            logger.error("Critical! Exit program after socket error....")
+            os._exit(0)
         logger.debug("start_socket - finally method")
 
 

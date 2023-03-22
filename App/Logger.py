@@ -28,7 +28,7 @@ class LogsToSocket:
 
     @staticmethod
     def add(record, message):
-
+        return #METHOD BLOCKED !
         data = {
             "message": message,
             "level": record.levelname,
