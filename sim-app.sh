@@ -31,7 +31,7 @@ function start_container {
   fi
 
   if [ -e ~/".sim-env" ]; then
-    env="--env-file ~/.sim-env"
+    env="--env-file $(readlink -f ~/.sim-env)"
     echo "Found .sim-env file in home directory."
   else
     env=""
