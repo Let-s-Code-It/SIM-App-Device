@@ -82,6 +82,7 @@ function upgrade_sh {
     if [ -w "$0" ]; then
         curl -o "$0" "$SH_FILE_PATH"
         echo -e "\033[0;33mA new version has been saved at: $0 \033[0m"
+        exit 1
     else
         echo -e "\033[0;31mYou do not have permission to modify the file: $0"
         echo "Try running the command as administrator. Use the sudo command:"
