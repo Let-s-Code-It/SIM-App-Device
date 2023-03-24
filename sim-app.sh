@@ -58,7 +58,7 @@ function update_container {
   echo "Building the image without cache..."
   # Build the image without using cache
   curl -o "$DOCKERFILE_PATH" "$DOCKERFILE_URL"
-  docker build --no-cache -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" .
+  docker build --network=host --no-cache -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" .
 
   start_container
 }
