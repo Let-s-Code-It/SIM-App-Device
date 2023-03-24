@@ -148,27 +148,34 @@ start_socket_function_bool = False
 
 def start_socket():
     start_success = False
-    try:
-        logger.debug("start_socket - try")
+    SocketClient.whileEstablishingAConnection = True
+    while not start_success:
+        try:
+            logger.debug("start_socket - try")
 
-        sio.connect( 
-            SQL.Get("socket_address"), 
-            namespaces=['/device'], 
-            headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
-            transports=['websocket']
-        )
-        start_success = True
-        logger.debug("Socket: sio.connect method succesfully")
-    except socketio.exceptions.ConnectionError:
-        logger.error("Socket Connection Error!")
-    except Exception as e:
-        logger.error("Socket Error: Other... ")
-        logger.error(e)
-    finally:
-        if not start_success:
-            logger.error("Critical! Exit program after socket error....")
-            os._exit(0)
-        logger.debug("start_socket - finally method")
+            sio.connect( 
+                SQL.Get("socket_address"), 
+                namespaces=['/device'], 
+                headers={"app-version": __VERSION__, 'app-version-sum': json.dumps(MD5Sum())},
+                transports=['websocket']
+            )
+            start_success = sio.connected
+            logger.debug("Socket: sio.connect method succesfully")
+        except socketio.exceptions.ConnectionError:
+            logger.error("Socket Connection Error!")
+        except Exception as e:
+            logger.error("Socket Error: Other... ")
+            logger.error(e)
+        finally:
+            time.sleep(5)
+            logger.debug("start_socket - finally method")
+            if start_success:
+                SocketClient.whileEstablishingAConnection = False
+            else:
+                logger.error("Critical! start_socket try again by loop ...")
+
+
+    
 
 
 
@@ -186,11 +193,17 @@ class SocketClient:
 
     keepAliveLastSentTime = 0
 
+    whileEstablishingAConnection = False
+
     @staticmethod
     def Connect():
-        #SocketClientThread = Thread(target=start_socket)
-        #SocketClientThread.start()
-        start_socket()
+        if SocketClient.whileEstablishingAConnection:
+            logger.debug("SocketConnection.Connection - break")
+            return
+
+        SocketClientThread = Thread(target=start_socket)
+        SocketClientThread.start()
+        #start_socket()
 
     @staticmethod
     def UpdateLoginKey(key):

@@ -39,21 +39,6 @@ class SerialReader(Protocol):
 
     def init(self, restored=False):
 
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
-        print('-')
 
         self.Ready = False
 
@@ -114,7 +99,7 @@ class SerialReader(Protocol):
         Bind new handler for given event
         """
 
-        logger.debug('bind_event')
+        #logger.debug('bind_event')
         if event not in self.callbacks:
             self.callbacks[event] = [callback]
         else:
@@ -425,7 +410,7 @@ class SerialReader(Protocol):
         logger.debug("Reader loop :)")
 
     def keepAlive(self):
-        logger.debug('keepAlive -> sio.eio.current_transport:' + sio.eio.current_transport)
+        #logger.debug('keepAlive -> sio.eio.current_transport:' + sio.eio.current_transport)
         if not SocketClient.IsConnected():
             SocketClient.keepAliveLastSentTime = 0
         elif SocketClient.keepAliveLastSentTime == 0 or (time.time() - SocketClient.keepAliveLastSentTime) < 120:

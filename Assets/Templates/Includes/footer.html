@@ -74,6 +74,9 @@
 					} else {
 						message += "<b style='color:red'>Disconnected</b>   (attempt every 10s)";
 					}
+
+					message += "<br>Launch Date: " + (new Date(d.launch_date * 1000)).toLocaleString();
+
 					global_alert.innerHTML = message;
 				})(d)
 	

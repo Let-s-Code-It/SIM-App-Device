@@ -30,7 +30,7 @@ from .Utils.modification_date import modification_date
 
 from .APN import apn_configured_check, apn_keys_list, get_apn_data
 
-from ..Config import __APPLICATION_DATA__,  __APPLICATION_PATH__, __VERSION__, __PYPI_PACKAGE_NAME__, __AUTHOR_PAGE__, __HOW_TO_UPDATE_PAGE__, __CONSOLE_LOGS_PATH__, __ADMIN_PASSWORD__, __ADMIN_AUTHORIZATION_ENABLED__, __WEB_PORT__
+from ..Config import __APPLICATION_DATA__,  __APPLICATION_PATH__, __VERSION__, __PYPI_PACKAGE_NAME__, __AUTHOR_PAGE__, __HOW_TO_UPDATE_PAGE__, __CONSOLE_LOGS_PATH__, __ADMIN_PASSWORD__, __ADMIN_AUTHORIZATION_ENABLED__, __WEB_PORT__, __LAUNCH_DATE__
 
 app = Flask(
     __name__, 
@@ -151,7 +151,7 @@ def json_data():
         "pin_code_required": GetReader().protocol.PinCodeRequired if GetReader() != None else False,
         "serial_ready": GetReader().protocol.Ready if GetReader() != None else False,
         "availablePinAttempts": GetReader().protocol.availablePinAttempts if GetReader() != None else False,
-
+        "launch_date": __LAUNCH_DATE__,
 
         "time_now" : datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
         "sms_list": SQL.select("SELECT * FROM sms ORDER by row_id DESC limit ?", [10])

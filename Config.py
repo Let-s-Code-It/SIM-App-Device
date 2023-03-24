@@ -48,3 +48,6 @@ __WEB_PORT__ = LaunchArguments.webport
 
 __ADMIN_AUTHORIZATION_ENABLED__ = LaunchArguments.authorization
 __ADMIN_PASSWORD__ = LaunchArguments.password if LaunchArguments.password != '' else os.getenv('AdminPassword', '') if os.getenv('AdminPassword', '') != '' else 'admin'
+
+from time import time
+__LAUNCH_DATE__ = time()
