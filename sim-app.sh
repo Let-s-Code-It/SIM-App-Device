@@ -38,7 +38,7 @@ function start_container {
   fi
 
   # Run the container in detached mode
-  docker run $env -v /etc/localtime:/etc/localtime:ro --restart=always --privileged -v ~/SIM-Data:/SIM-Data -p 8098:8098 -d "$IMAGE_NAME"
+  docker run --network=host $env -v /etc/localtime:/etc/localtime:ro --restart=always --privileged -v ~/SIM-Data:/SIM-Data -p 8098:8098 -d "$IMAGE_NAME"
 }
 
 function update_container {
