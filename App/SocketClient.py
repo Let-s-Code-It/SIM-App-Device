@@ -17,7 +17,12 @@ from .Utils.MD5Sum import MD5Sum
 import json
 import os
 #sio = socketio.Client(logger=True, engineio_logger=True)
-sio = socketio.Client()
+sio = socketio.Client(
+    reconnection_attempts=5,  # liczba prób ponownego połączenia
+    reconnection_delay=1,  # opóźnienie między próbami ponownego połączenia (w sekundach)
+    reconnection_delay_max=5,  # maksymalne opóźnienie między próbami ponownego połączenia (w sekundach)
+    randomization_factor=0.5  # wartość losowa używana do obliczania losowego opóźnienia między próbami (zakres od 0 do 1)
+)
 
 @sio.event(namespace='/device')
 def connect():
