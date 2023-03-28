@@ -421,8 +421,8 @@ class SerialReader(Protocol):
         else:
             #SocketClient.Connect()
             logger.info("Socket restart required - keep alive limit...")
-            SocketClient.keepAliveLastSentTime = 0
-            SocketClient.Disconnect(force=True)
+            # SocketClient.keepAliveLastSentTime = 0
+            # SocketClient.Disconnect(force=True)
 
     def noSimCard(self):
         logger.debug("noSimCard method...")

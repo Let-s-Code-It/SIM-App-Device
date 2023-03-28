@@ -18,10 +18,10 @@ import json
 import os
 #sio = socketio.Client(logger=True, engineio_logger=True)
 sio = socketio.Client(
-    reconnection_attempts=5,  # liczba prób ponownego połączenia
-    reconnection_delay=1,  # opóźnienie między próbami ponownego połączenia (w sekundach)
-    reconnection_delay_max=5,  # maksymalne opóźnienie między próbami ponownego połączenia (w sekundach)
-    randomization_factor=0.5  # wartość losowa używana do obliczania losowego opóźnienia między próbami (zakres od 0 do 1)
+    # reconnection_attempts=5,  # liczba prób ponownego połączenia
+    # reconnection_delay=1,  # opóźnienie między próbami ponownego połączenia (w sekundach)
+    # reconnection_delay_max=5,  # maksymalne opóźnienie między próbami ponownego połączenia (w sekundach)
+    # randomization_factor=0.5  # wartość losowa używana do obliczania losowego opóźnienia między próbami (zakres od 0 do 1)
 )
 
 @sio.event(namespace='/device')
@@ -41,10 +41,10 @@ def connect_error(data):
 @sio.event(namespace='/device')
 def disconnect():
     logger.debug("I'm disconnected!")
-    SocketClient.Logged = False
-    defineLogToSocketFunction(None)
+    # SocketClient.Logged = False
+    # defineLogToSocketFunction(None)
 
-    SocketClient.Connect()
+    # SocketClient.Connect()
 
 
 @sio.on('my message', namespace='/device')
@@ -153,7 +153,7 @@ start_socket_function_bool = False
 
 def start_socket():
     start_success = False
-    SocketClient.whileEstablishingAConnection = True
+    #SocketClient.whileEstablishingAConnection = True
     while not start_success:
         try:
             logger.debug("start_socket - try")
@@ -174,10 +174,10 @@ def start_socket():
         finally:
             time.sleep(5)
             logger.debug("start_socket - finally method")
-            if start_success:
-                SocketClient.whileEstablishingAConnection = False
-            else:
-                logger.error("Critical! start_socket try again by loop ...")
+            # if start_success:
+            #     SocketClient.whileEstablishingAConnection = False
+            # else:
+            logger.error("Critical! start_socket try again by loop ...")
 
 
     
@@ -202,9 +202,9 @@ class SocketClient:
 
     @staticmethod
     def Connect():
-        if SocketClient.whileEstablishingAConnection:
-            logger.debug("SocketConnection.Connection - break")
-            return
+        # if SocketClient.whileEstablishingAConnection:
+        #     logger.debug("SocketConnection.Connection - break")
+        #     return
 
         SocketClientThread = Thread(target=start_socket)
         SocketClientThread.start()
@@ -227,31 +227,31 @@ class SocketClient:
         logger.debug("Update Socket Path... " + address)
 
 
-    @staticmethod
-    def Disconnect(force=False):
-        logger.debug("SocketClient.Disconnect() method")
+    # @staticmethod
+    # def Disconnect(force=False):
+    #     logger.debug("SocketClient.Disconnect() method")
 
-        if force:
-            logger.debug("Force disconnect!")
-            #sio.eio.disconnect()
+    #     if force:
+    #         logger.debug("Force disconnect!")
+    #         #sio.eio.disconnect()
 
-        sio.disconnect()
+    #     sio.disconnect()
 
-        SocketClient.Logged = False
-        defineLogToSocketFunction(None)
+    #     SocketClient.Logged = False
+    #     defineLogToSocketFunction(None)
 
-    @staticmethod
-    def Reload():
-        logger.debug("Reload SocketClient....")
-        if sio.connected or AtLeastOnceConnected:
-            logger.debug("Socket IO is connected: Trying to recconect after change key/address")
-            sio.disconnect()
+    # @staticmethod
+    # def Reload():
+    #     logger.debug("Reload SocketClient....")
+    #     if sio.connected or AtLeastOnceConnected:
+    #         logger.debug("Socket IO is connected: Trying to recconect after change key/address")
+    #         sio.disconnect()
 
-            SocketClient.Connect()
+    #         SocketClient.Connect()
 
-        else:
-            logger.debug("Socket IO is disconnected: Update address/key updated. Please wait to reconnect.")
-            SocketClient.Connect()
+    #     else:
+    #         logger.debug("Socket IO is disconnected: Update address/key updated. Please wait to reconnect.")
+    #         SocketClient.Connect()
 
     @staticmethod
     def IsConnected():
