@@ -74,7 +74,7 @@ import signal
 import os
 def signal_handler(sig, frame):
 	print('You pressed Ctrl+C!')
-	SocketClient.Disconnect()
+	#SocketClient.Disconnect()
 	os._exit(0)
 
 

@@ -420,7 +420,7 @@ class SerialReader(Protocol):
             self.emit("keep alive")
         else:
             #SocketClient.Connect()
-            logger.info("Socket restart required - keep alive limit...")
+            logger.info("Socket restart required - keep alive limit... ({})".format("connected" if sio.connected else "disconnected"))
             # SocketClient.keepAliveLastSentTime = 0
             # SocketClient.Disconnect(force=True)
 

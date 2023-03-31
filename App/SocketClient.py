@@ -27,6 +27,7 @@ sio = socketio.Client(
 @sio.event(namespace='/device')
 def connect():
     logger.debug("I'm connected!")
+    logger.debug(sio.sid)
 
     auth = SQL.Get("socket_unique_auth_key")
     if auth != "":

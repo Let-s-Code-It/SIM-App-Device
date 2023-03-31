@@ -9,11 +9,11 @@
 /App/Utils/MD5Sum.py:04630a8ad2c982aa6359f05194c15f35
 /App/Web.py:fa8c80d24fdfce7a0da36c7fa8a1654b
 /App/APN.py:6869a42ea536e9f443adfb3f493252a3
-/App/SocketClient.py:36ca768ce8687bb39428ba9246df341a
+/App/SocketClient.py:5934d03275f210934a64223156168b74
 /App/Device.py:846464de2efe5767392d9b24c6ffc6c4
 /App/Logger.py:eb778f4f36529bc7e701d4d9734d2b09
 /App/LaunchArguments.py:85b2536e3a7c6ac5ffd9976d248c752f
 /App/SQL.py:d5c31fd6c88f0b3dc48e017980c188ce
 /App/SIM800/__init__.py:d41d8cd98f00b204e9800998ecf8427e
-/App/SIM800/SerialReader.py:fbcfdf4094a420b80d4ed798ff10d86e
+/App/SIM800/SerialReader.py:2e1c42cf8a8c0ce8454a3d3011e4fec0
 /App/SIM800/AppHandler.py:2512602c17f237539c9b90dbeaafbf42
