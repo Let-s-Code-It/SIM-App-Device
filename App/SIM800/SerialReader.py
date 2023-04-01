@@ -421,6 +421,7 @@ class SerialReader(Protocol):
         else:
             #SocketClient.Connect()
             logger.info("Socket restart required - keep alive limit... ({})".format("connected" if sio.connected else "disconnected"))
+            sio.disconnect()
             # SocketClient.keepAliveLastSentTime = 0
             # SocketClient.Disconnect(force=True)
 
