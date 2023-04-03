@@ -15,5 +15,5 @@
 /App/LaunchArguments.py:85b2536e3a7c6ac5ffd9976d248c752f
 /App/SQL.py:d5c31fd6c88f0b3dc48e017980c188ce
 /App/SIM800/__init__.py:d41d8cd98f00b204e9800998ecf8427e
-/App/SIM800/SerialReader.py:2e1c42cf8a8c0ce8454a3d3011e4fec0
+/App/SIM800/SerialReader.py:7a215ef0d3ad12b34db4cdbbe85b3a1b
 /App/SIM800/AppHandler.py:2512602c17f237539c9b90dbeaafbf42
