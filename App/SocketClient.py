@@ -178,7 +178,7 @@ def start_socket():
             # if start_success:
             #     SocketClient.whileEstablishingAConnection = False
             # else:
-            logger.error("Critical! start_socket try again by loop ...")
+            #logger.error("Critical! start_socket try again by loop ...")
 
 
     

@@ -14,7 +14,7 @@ QueuedCommand = namedtuple('QueuedCommand', ['value', 'callback'])
 
 from ..Logger import logger
 
-from ...Config import __SERIAL_LOOP_ENABLED__
+from ...Config import __SERIAL_LOOP_ENABLED__, __ALLOW_SERIAL_CONFIGURATION__
 
 import os
 
@@ -72,7 +72,10 @@ class SerialReader(Protocol):
         if restored:
             self.emit("serial connection confirmed")
 
-        #self.reconfigure()
+        if __ALLOW_SERIAL_CONFIGURATION__ == "1":
+            self.reconfigure()
+        else:
+            logger.info("running common commands for AT was blocked due to test setup. change the AllowToSerialConfiguration value in the configuration to 1")
 
     def GetInfo(self):
         return {
@@ -421,11 +424,12 @@ class SerialReader(Protocol):
         else:
             #SocketClient.Connect()
             logger.info("Socket restart required - keep alive limit... ({})".format("connected" if sio.connected else "disconnected"))
-            sio.disconnect()
-            sio.wait()
-            logger.info("Socket eio disconnect now.")
-            sio.eio.disconnect()
-            #os._exit(0)
+            # sio.disconnect()
+            # sio.wait()
+            # logger.info("Socket eio disconnect now.")
+            # sio.eio.disconnect()
+            logger.info("Exit app - restarting docker")
+            os._exit(0)
             # SocketClient.keepAliveLastSentTime = 0
             # SocketClient.Disconnect(force=True)
 

@@ -51,3 +51,6 @@ __ADMIN_PASSWORD__ = LaunchArguments.password if LaunchArguments.password != '' 
 
 from time import time
 __LAUNCH_DATE__ = time()
+
+
+__ALLOW_SERIAL_CONFIGURATION__ = os.getenv('AllowToSerialConfiguration', '1')
