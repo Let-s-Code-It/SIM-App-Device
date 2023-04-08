@@ -11,7 +11,7 @@
 /App/APN.py:6869a42ea536e9f443adfb3f493252a3
 /App/SocketClient.py:7bc933421bf4de2e8d070eaac5020629
 /App/Device.py:846464de2efe5767392d9b24c6ffc6c4
-/App/Logger.py:eb778f4f36529bc7e701d4d9734d2b09
+/App/Logger.py:33364210efd22b1de81483e4835caf4c
 /App/LaunchArguments.py:85b2536e3a7c6ac5ffd9976d248c752f
 /App/SQL.py:d5c31fd6c88f0b3dc48e017980c188ce
 /App/SIM800/__init__.py:d41d8cd98f00b204e9800998ecf8427e

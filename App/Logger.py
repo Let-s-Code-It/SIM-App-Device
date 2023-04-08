@@ -69,6 +69,10 @@ def setup_custom_logger(name):
     
     if not os.path.exists(__CONSOLE_LOGS_PATH__):
         os.makedirs(__CONSOLE_LOGS_PATH__)
+    else:
+        log_files = sorted([f for f in os.listdir(__CONSOLE_LOGS_PATH__) if f.endswith(".console.txt")], key=lambda f: os.path.getmtime(os.path.join(__CONSOLE_LOGS_PATH__, f)))
+        for file in log_files[:-5]:
+            os.remove(os.path.join(__CONSOLE_LOGS_PATH__, file))
 
     logFile = os.path.join(__CONSOLE_LOGS_PATH__, datetime.today().strftime('%Y-%m-%d_%H-%M-%S') + '.console.txt')
     print("Log file: " + logFile)
